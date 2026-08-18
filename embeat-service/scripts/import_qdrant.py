@@ -18,8 +18,8 @@ from typing import Generator
 import torch
 from datasets import load_dataset
 from qdrant_client import QdrantClient, models
-from qdrant_client.http.models import Distance, VectorParams, PointStruct
-from qdrant_client.http.exceptions import UnexpectedResponse
+from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.exceptions import UnexpectedResponse
 
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

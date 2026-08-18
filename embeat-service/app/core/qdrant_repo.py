@@ -1,11 +1,11 @@
 import logging
 from typing import Optional
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import (
+from qdrant_client.models import (
     Distance, VectorParams, Filter, FieldCondition, MatchValue,
-    SearchRequest, SortOptions, SortOrder
+    SortOptions, SortOrder
 )
-from qdrant_client.http.exceptions import UnexpectedResponse
+from qdrant_client.exceptions import UnexpectedResponse
 
 from app.config import settings
 
