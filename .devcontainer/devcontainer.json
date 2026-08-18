@@ -4,8 +4,9 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "forwardPorts": [8080, 7860, 8090, 6333, 5432],
+  "forwardPorts": [80, 8080, 7860, 8090, 6333, 5432],
   "portsAttributes": {
+    "80": { "label": "前端管理后台" },
     "8080": { "label": "API 网关" },
     "7860": { "label": "Embeat 推理" },
     "8090": { "label": "画像服务" },

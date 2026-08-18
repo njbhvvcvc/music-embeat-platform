@@ -30,7 +30,15 @@ if [ ! -f embeat-service/checkpoints/EmbeatMLP/model.pt ]; then
     https://raw.githubusercontent.com/gdstudio-org/Embeat/main/checkpoints/EmbeatMLP/model.pt
 fi
 
-# 3. 启动基础服务
+# 3. 构建前端 (Vue UI)
+echo "🎨 构建前端管理后台..."
+cd deploy/web-ui
+if [ ! -d node_modules ]; then npm install 2>&1 | tail -3; fi
+npm run build 2>&1 | tail -5
+cd ../..
+echo "  ✅ 前端构建完成 -> deploy/web-ui/dist"
+
+# 4. 启动基础服务
 echo "🚀 启动 Qdrant + PostgreSQL..."
 docker compose -f deploy/clawcloud/docker-compose.yml up -d qdrant postgres
 
@@ -41,7 +49,7 @@ for i in $(seq 1 30); do
   sleep 5
 done
 
-# 4. 导入全量 (4GB memmap 模式)
+# 5. 导入全量 (4GB memmap 模式)
 if [ "$WITH_IMPORT" = true ]; then
   echo "📥 导入全量 45M (memmap 模式, 不建索引)..."
   docker compose -f deploy/clawcloud/docker-compose.yml stop gateway embeat profile 2>/dev/null || true
@@ -53,11 +61,12 @@ if [ "$WITH_IMPORT" = true ]; then
   echo "💡 建议: 导入后打包 Qdrant 数据传到 WebDAV 备份 (见 docs/CODESPACES.md)"
 fi
 
-# 5. 启动全部
+# 6. 启动全部 (含 Nginx 前端)
 docker compose -f deploy/clawcloud/docker-compose.yml up -d
 
 echo ""
 echo "========== 健康检查 =========="
+curl -sf http://localhost/health && echo " ✅ 前端(Nginx)" || echo " ❌ 前端"
 curl -sf http://localhost:8080/health && echo " ✅ 网关" || echo " ❌ 网关"
 curl -sf http://localhost:7860/health && echo " ✅ Embeat" || echo " ❌ Embeat"
 curl -sf http://localhost:8090/health && echo " ✅ 画像" || echo " ❌ 画像"
@@ -66,5 +75,6 @@ echo "================================"
 
 echo ""
 echo "✅ 部署完成！端口已自动转发，访问 Codespaces 提供的 URL 即可"
+echo "  前端管理:   https://<codespace>-80.app.github.dev"
 echo "  API 网关:   https://<codespace>-8080.app.github.dev"
 echo "  Qdrant:     https://<codespace>-6333.app.github.dev/dashboard"
