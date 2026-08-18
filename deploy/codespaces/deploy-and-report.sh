@@ -25,10 +25,16 @@ echo "=== 回传部署结果到 deploy-status 分支 ==="
 cd /workspaces/music-embeat-platform
 git config user.email "opencode@local" 2>/dev/null
 git config user.name "opencode" 2>/dev/null
+# 用 worktree 回传，绝不切换主工作目录（避免覆盖 bind-mount 的配置文件）
 git fetch origin deploy-status 2>/dev/null
-git checkout -f -B deploy-status origin/deploy-status 2>/dev/null || git checkout -f -b deploy-status
+rm -rf /workspaces/deploy-status-wt
+git worktree prune --expire 1s 2>/dev/null
+git worktree add --detach /workspaces/deploy-status-wt origin/deploy-status
+cd /workspaces/deploy-status-wt
 cp /workspaces/deploy-status.txt deploy-status.txt
 git add deploy-status.txt
 git commit -m "deploy status $(date -u)" 2>&1 | tail -1
-git push --force origin deploy-status 2>&1 | tail -1
+git push --force origin HEAD:deploy-status 2>&1 | tail -1
+cd /workspaces/music-embeat-platform
+git worktree remove --force /workspaces/deploy-status-wt 2>/dev/null
 echo "REPORT_DONE"
