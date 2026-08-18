@@ -1,46 +1,43 @@
 DEPLOY_RC=1
-TIME=Tue Aug 18 07:26:43 UTC 2026
+TIME=Tue Aug 18 07:42:35 UTC 2026
 === docker ps ===
 NAMES               STATUS
-embeat-postgres-1   Restarting (1) 4 seconds ago
-embeat-qdrant-1     Up 27 seconds (health: starting)
+embeat-postgres-1   Up 29 seconds (healthy)
+embeat-qdrant-1     Up 29 seconds (health: starting)
 === tail deploy.log ===
  46f977ee452f Downloading     404B/404B
- 390dc935348d Downloading  1.398kB/1.398kB
  d0008c891db4 Downloading  1.211kB/1.211kB
- 46f977ee452f Downloading     404B/404B
- 390dc935348d Download complete 
+ 390dc935348d Downloading  1.398kB/1.398kB
  46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Downloading  1.891MB/1.891MB
- d0008c891db4 Download complete 
- 46f977ee452f Download complete 
  46519e7231d2 Download complete 
  3cd534fe98c6 Download complete 
+ 1223f016b4e4 Downloading     627B/627B
+ 46f977ee452f Downloading     404B/404B
+ d0008c891db4 Downloading  1.211kB/1.211kB
+ 3cd534fe98c6 Extracting 1 s
+ 390dc935348d Download complete 
+ 1223f016b4e4 Download complete 
+ 46f977ee452f Download complete 
+ d0008c891db4 Download complete 
  3cd534fe98c6 Extracting 1 s
  3cd534fe98c6 Extracting 1 s
  3cd534fe98c6 Extracting 1 s
  3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 1 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
- 3cd534fe98c6 Extracting 2 s
  139c372786b9 Downloading  22.54kB/22.54kB
- 3cd534fe98c6 Pull complete 
+ 3cd534fe98c6 Extracting 1 s
+ 3cd534fe98c6 Extracting 1 s
  139c372786b9 Download complete 
+ cd757d6c129e Downloading  866.6kB/866.6kB
+ 3cd534fe98c6 Extracting 1 s
+ cd757d6c129e Download complete 
+ 3cd534fe98c6 Pull complete 
+ 1223f016b4e4 Extracting 1 s
+ 62bec68d7c31 Extracting 1 s
  1223f016b4e4 Pull complete 
  62bec68d7c31 Pull complete 
- d0008c891db4 Pull complete 
+ 390dc935348d Extracting 1 s
  46f977ee452f Pull complete 
- cd757d6c129e Download complete 
+ d0008c891db4 Pull complete 
  390dc935348d Pull complete 
  46519e7231d2 Extracting 1 s
  46519e7231d2 Extracting 1 s
@@ -52,8 +49,11 @@ embeat-qdrant-1     Up 27 seconds (health: starting)
  46519e7231d2 Extracting 1 s
  46519e7231d2 Extracting 1 s
  46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
+ 46519e7231d2 Extracting 2 s
+ 46519e7231d2 Extracting 2 s
+ 46519e7231d2 Extracting 2 s
+ 46519e7231d2 Extracting 2 s
+ 46519e7231d2 Extracting 2 s
  46519e7231d2 Extracting 2 s
  46519e7231d2 Extracting 2 s
  46519e7231d2 Extracting 2 s
@@ -61,7 +61,7 @@ embeat-qdrant-1     Up 27 seconds (health: starting)
  46519e7231d2 Pull complete 
  nginx Pulled 
 #1 [internal] load local bake definitions
-#1 reading from stdin 1.56kB done
+#1 reading from stdin 1.50kB done
 #1 DONE 0.0s
-unable to prepare context: path "/workspaces/music-embeat-platform/deploy/clawcloud/gateway" not found
+unable to prepare context: path "/workspaces/music-embeat-platform/deploy/embeat-service" not found
 
