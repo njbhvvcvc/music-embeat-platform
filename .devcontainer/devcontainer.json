@@ -2,7 +2,10 @@
   "name": "music-embeat-platform",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
   },
   "forwardPorts": [80, 8080, 7860, 8090, 6333, 5432],
   "portsAttributes": {
