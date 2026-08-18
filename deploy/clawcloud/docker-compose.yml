@@ -97,7 +97,7 @@ services:
       - "6334:6334"
     volumes:
       - qdrant-data:/qdrant/storage:z
-      - ./deploy/raw/qdrant/config.yaml:/qdrant/config/config.yaml:ro
+      - ./qdrant/config.yaml:/qdrant/config/config.yaml:ro
     environment:
       - QDRANT__SERVICE__GRPC_PORT=6334
       - QDRANT__LOG_LEVEL=INFO

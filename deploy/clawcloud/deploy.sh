@@ -36,7 +36,7 @@ fi
 
 # 3. 构建并启动基础服务 (qdrant + postgres)
 echo "🚀 启动 Qdrant + PostgreSQL..."
-docker compose -f deploy/raw/docker-compose.yml up -d qdrant postgres
+docker compose -f deploy/clawcloud/docker-compose.yml up -d qdrant postgres
 
 # 4. 等待 Qdrant 就绪
 echo "⏳ 等待 Qdrant 就绪..."
@@ -53,37 +53,37 @@ done
 if [ "$WITH_IMPORT" = true ]; then
   echo "📥 开始导入数据 (模式: $IMPORT_MODE)..."
   # 导入时只跑 qdrant，停掉其他服务省内存
-  docker compose -f deploy/raw/docker-compose.yml stop gateway embeat profile 2>/dev/null || true
+  docker compose -f deploy/clawcloud/docker-compose.yml stop gateway embeat profile 2>/dev/null || true
 
   case $IMPORT_MODE in
     full)
-      docker compose -f deploy/raw/docker-compose.yml run --rm \
+      docker compose -f deploy/clawcloud/docker-compose.yml run --rm \
         -e QDRANT_HOST=qdrant -e QDRANT_PORT=6333 \
         embeat python scripts/import_qdrant.py --full \
         --indexing-threshold 10000000 --memmap-threshold 0 --batch-size 200
       ;;
     cn)
-      docker compose -f deploy/raw/docker-compose.yml run --rm \
+      docker compose -f deploy/clawcloud/docker-compose.yml run --rm \
         -e QDRANT_HOST=qdrant -e QDRANT_PORT=6333 \
         embeat python scripts/import_qdrant.py --cn-only \
         --indexing-threshold 10000000 --memmap-threshold 0 --batch-size 200
       ;;
     sample)
-      docker compose -f deploy/raw/docker-compose.yml run --rm \
+      docker compose -f deploy/clawcloud/docker-compose.yml run --rm \
         -e QDRANT_HOST=qdrant -e QDRANT_PORT=6333 \
         embeat python scripts/import_qdrant.py --sample 1000 --batch-size 200
       ;;
   esac
 
   echo "🔨 导入完成，触发索引构建（需要额外内存，建议此时停掉其他服务）..."
-  docker compose -f deploy/raw/docker-compose.yml run --rm \
+  docker compose -f deploy/clawcloud/docker-compose.yml run --rm \
     -e QDRANT_HOST=qdrant -e QDRANT_PORT=6333 \
     embeat python scripts/build_index.py || echo "⚠️  索引构建失败，可稍后手动执行"
 fi
 
 # 6. 启动全部服务
 echo "🚀 启动全部服务..."
-docker compose -f deploy/raw/docker-compose.yml up -d
+docker compose -f deploy/clawcloud/docker-compose.yml up -d
 
 # 7. 健康检查
 echo ""
