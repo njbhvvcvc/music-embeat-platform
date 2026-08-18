@@ -1,0 +1,23 @@
+{
+  "name": "music-embeat-platform",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [8080, 7860, 8090, 6333, 5432],
+  "portsAttributes": {
+    "8080": { "label": "API 网关" },
+    "7860": { "label": "Embeat 推理" },
+    "8090": { "label": "画像服务" },
+    "6333": { "label": "Qdrant 面板" }
+  },
+  "postCreateCommand": "pip install modelscope 2>/dev/null || true",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-azuretools.vscode-docker"]
+    }
+  },
+  "remoteEnv": {
+    "COMPOSE_PROJECT_NAME": "embeat"
+  }
+}

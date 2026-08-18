@@ -1,0 +1,21 @@
+# Qdrant 配置 - RAW 4GB 优化版
+# 核心：用内存映射代替 RAM 存储向量，导入时不开索引
+
+storage:
+  memmap_threshold: 0          # 0 = 所有向量用 mmap（不占 RAM）
+  wal_capacity_mb: 32
+  # 禁用自动优化，导入完成后再手动触发
+  optimizer_status: 0          # 0 = 禁用后台优化（导入时不建索引）
+
+service:
+  grpc_port: 6334
+  http_port: 6333
+  max_request_size_mb: 32
+  # 限制并发，避免内存峰值
+  request_timeout_sec: 30
+
+# 关闭遥测
+telemetry_disabled: true
+
+# 日志级别
+log_level: INFO

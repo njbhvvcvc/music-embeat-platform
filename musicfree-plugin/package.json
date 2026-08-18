@@ -1,0 +1,11 @@
+{
+  "name": "musicfree-plugin-embeat",
+  "version": "1.0.0",
+  "description": "Embeat 智能推荐插件 - 基于声学特征的 AI 音乐推荐",
+  "main": "dist/plugin.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/dev.js"
+  },
+  "devDependencies": {}
+}

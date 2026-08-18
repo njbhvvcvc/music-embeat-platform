@@ -1,0 +1,223 @@
+version: "3.8"
+
+networks:
+  embeat-net:
+    driver: bridge
+
+volumes:
+  qdrant-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+services:
+  # ==================== A1: API 网关 ====================
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - GD_API_BASE=${GD_API_BASE:-https://music-api.gdstudio.xyz/api.php}
+      - GD_API_RATE_LIMIT=${GD_API_RATE_LIMIT:-50}
+      - GD_API_RATE_WINDOW=${GD_API_RATE_WINDOW:-300}
+      - EMBEAT_BASE=http://embeat:7860
+      - PROFILE_BASE=http://profile:8090
+    depends_on:
+      embeat:
+        condition: service_healthy
+      profile:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # ==================== A3: Embeat 推荐引擎 ====================
+  embeat:
+    build:
+      context: ./embeat-service
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      - EMBEAT_PORT=${EMBEAT_PORT:-7860}
+      - EMBEAT_MODEL_PATH=${EMBEAT_MODEL_PATH:-/app/checkpoints/EmbeatMLP}
+      - EMBEAT_DISABLE_TRACK2VEC=${EMBEAT_DISABLE_TRACK2VEC:-true}
+      - EMBEAT_TOP_K=${EMBEAT_TOP_K:-20}
+      - EMBEAT_CHANNELS=${EMBEAT_CHANNELS:-similar,popular,same_artist,related_artist}
+      - QDRANT_HOST=${QDRANT_HOST:-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-embeat_45m}
+    volumes:
+      - ./embeat-service/checkpoints:/app/checkpoints:ro
+      - qdrant-data:/data/qdrant
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:7860/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+        reservations:
+          memory: 1G
+
+  # ==================== A4: Qdrant 向量数据库 ====================
+  qdrant:
+    image: qdrant/qdrant:v1.13.6
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage:z
+    environment:
+      - QDRANT__STORAGE__MEM_LIMIT=${QDRANT_MEMORY_LIMIT:-3G}
+      - QDRANT__STORAGE__WAL_CAPACITY_MB=${QDRANT_WAL_CAPACITY_MB:-64}
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=INFO
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6333/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # ==================== A5: 用户画像服务 ====================
+  profile:
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - PROFILE_PORT=${PROFILE_PORT:-8090}
+      - POSTGRES_DB=${POSTGRES_DB:-embeat_profile}
+      - POSTGRES_USER=${POSTGRES_USER:-embeat}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me-in-production}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - EMBEAT_BASE=http://embeat:7860
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ==================== PostgreSQL ====================
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data:z
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-embeat_profile}
+      - POSTGRES_USER=${POSTGRES_USER:-embeat}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me-in-production}
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U embeat -d embeat_profile"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # ==================== Nginx 反代 + SSL (可选) ====================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./deploy/certs:/etc/nginx/certs:ro
+    depends_on:
+      - gateway
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    profiles:
+      - with-nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

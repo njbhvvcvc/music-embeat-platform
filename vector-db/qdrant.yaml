@@ -1,0 +1,32 @@
+# Qdrant 服务配置
+log_level: INFO
+
+storage:
+  # 存储路径
+  storage_path: /qdrant/storage
+
+  # 内存限制
+  mem_limit: 4G
+
+  # WAL 容量限制
+  wal_capacity_mb: 64
+
+  # 性能优化
+  optimizers:
+    default_segment_number: 2
+    memmap_threshold_kb: 20000
+    indexing_threshold: 10000
+
+  # HNSW 索引配置
+  hnsw:
+    m: 16
+    ef_construct: 200
+    full_scan_threshold: 10000
+
+service:
+  # gRPC 端口
+  grpc_port: 6334
+  # HTTP 端口
+  http_port: 6333
+  # 最大请求大小
+  max_request_size_mb: 64

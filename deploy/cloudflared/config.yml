@@ -1,0 +1,20 @@
+# Cloudflare Tunnel 配置
+# 使用方式：
+#   1. 首次登录：cloudflared tunnel login
+#   2. 创建隧道：cloudflared tunnel create embeat
+#   3. 路由域名：cloudflared tunnel route dns embeat embeat.yourdomain.com
+#   4. 启动：cloudflared tunnel run embeat
+
+tunnel: embeat
+credentials-file: /root/.cloudflared/embeat.json
+
+ingress:
+  # 网关 API
+  - hostname: embeat.yourdomain.com
+    service: http://gateway:8080
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+
+  # 所有其他流量走网关
+  - service: http://gateway:8080

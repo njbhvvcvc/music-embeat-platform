@@ -1,0 +1,43 @@
+# ========== Python ==========
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ========== 模型权重 (从 GitHub 下载，不提交) ==========
+embeat-service/checkpoints/**/*.pt
+embeat-service/checkpoints/**/*.bin
+embeat-service/checkpoints/**/*.onnx
+
+# ========== 环境变量 / 密钥 ==========
+.env
+.env.*
+!.env.example
+
+# ========== 数据卷 ==========
+qdrant-data/
+postgres-data/
+deploy/*/qdrant-data/
+**/qdrant/storage/
+
+# ========== Node ==========
+node_modules/
+deploy/web-ui/dist/
+*.log
+
+# ========== 系统 ==========
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ========== 临时 ==========
+self_check_report.json
+*.tmp

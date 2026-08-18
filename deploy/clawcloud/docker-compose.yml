@@ -1,0 +1,183 @@
+version: "3.8"
+
+# RAW 4GB 优化版 - 全套服务保留，内存压到最低
+# 部署前：cp .env.example .env && vim .env
+
+networks:
+  embeat-net:
+    driver: bridge
+
+volumes:
+  qdrant-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+services:
+  # ==================== A1: API 网关 ====================
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - GD_API_BASE=${GD_API_BASE:-https://music-api.gdstudio.xyz/api.php}
+      - GD_API_RATE_LIMIT=${GD_API_RATE_LIMIT:-50}
+      - GD_API_RATE_WINDOW=${GD_API_RATE_WINDOW:-300}
+      - EMBEAT_BASE=http://embeat:7860
+      - PROFILE_BASE=http://profile:8090
+    depends_on:
+      embeat:
+        condition: service_healthy
+      profile:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    # 单 worker，限制内存
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ==================== A3: Embeat 推荐引擎 ====================
+  embeat:
+    build:
+      context: ./embeat-service
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      - EMBEAT_PORT=${EMBEAT_PORT:-7860}
+      - EMBEAT_MODEL_PATH=${EMBEAT_MODEL_PATH:-/app/checkpoints/EmbeatMLP}
+      - EMBEAT_DISABLE_TRACK2VEC=${EMBEAT_DISABLE_TRACK2VEC:-true}
+      - EMBEAT_TOP_K=${EMBEAT_TOP_K:-20}
+      - EMBEAT_CHANNELS=${EMBEAT_CHANNELS:-similar,popular,same_artist,related_artist}
+      - QDRANT_HOST=${QDRANT_HOST:-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-embeat_45m}
+    volumes:
+      - ./embeat-service/checkpoints:/app/checkpoints:ro
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "1"]
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:7860/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ==================== A4: Qdrant 向量数据库 ====================
+  qdrant:
+    image: qdrant/qdrant:v1.13.6
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage:z
+      - ./deploy/raw/qdrant/config.yaml:/qdrant/config/config.yaml:ro
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=INFO
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    # memmap 模式，内存占用低
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+        reservations:
+          memory: 768M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6333/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ==================== A5: 用户画像服务 ====================
+  profile:
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - PROFILE_PORT=${PROFILE_PORT:-8090}
+      - POSTGRES_DB=${POSTGRES_DB:-embeat_profile}
+      - POSTGRES_USER=${POSTGRES_USER:-embeat}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me-in-production}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - EMBEAT_BASE=http://embeat:7860
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8090", "--workers", "1"]
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8090/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ==================== PostgreSQL ====================
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data:z
+      - ./deploy/raw/postgres/postgres.conf:/etc/postgresql/postgresql.conf:ro
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-embeat_profile}
+      - POSTGRES_USER=${POSTGRES_USER:-embeat}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change-me-in-production}
+    networks:
+      - embeat-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U embeat -d embeat_profile"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

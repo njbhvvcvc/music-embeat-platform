@@ -1,0 +1,16 @@
+# Qdrant 配置 - 1GB 单语种子集版
+# 子集只有 10-50 万条，内存占用极低
+
+storage:
+  memmap_threshold: 10000       # 1万条后用 mmap
+  wal_capacity_mb: 16
+  optimizer_status: 1           # 1 = 启用后台优化（子集小，建索引很快）
+
+service:
+  grpc_port: 6334
+  http_port: 6333
+  max_request_size_mb: 16
+  request_timeout_sec: 30
+
+telemetry_disabled: true
+log_level: INFO
