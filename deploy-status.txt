@@ -1,67 +1,68 @@
 DEPLOY_RC=1
-TIME=Tue Aug 18 07:51:37 UTC 2026
+TIME=Tue Aug 18 08:10:47 UTC 2026
 === docker ps ===
 NAMES               STATUS
-embeat-postgres-1   Up 31 seconds (healthy)
-embeat-qdrant-1     Up 31 seconds (health: starting)
+embeat-profile-1    Up 2 seconds (health: starting)
+embeat-postgres-1   Up 14 minutes (healthy)
+embeat-qdrant-1     Up 14 minutes (unhealthy)
 === tail deploy.log ===
- 3cd534fe98c6 Downloading  1.891MB/1.891MB
- 46519e7231d2 Downloading  4.194MB/20.31MB
- 46519e7231d2 Downloading  9.437MB/20.31MB
- 46f977ee452f Downloading     404B/404B
- 3cd534fe98c6 Download complete 
- 3cd534fe98c6 Extracting 1 s
- 62bec68d7c31 Download complete 
- 46519e7231d2 Downloading  14.68MB/20.31MB
- 46f977ee452f Download complete 
- 3cd534fe98c6 Extracting 1 s
- d0008c891db4 Downloading  1.211kB/1.211kB
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 1 s
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 3cd534fe98c6 Extracting 2 s
- d0008c891db4 Download complete 
- 46519e7231d2 Downloading  20.31MB/20.31MB
- 46519e7231d2 Download complete 
- 1223f016b4e4 Pull complete 
- 3cd534fe98c6 Pull complete 
- 62bec68d7c31 Extracting 1 s
- 62bec68d7c31 Pull complete 
- 46f977ee452f Pull complete 
- d0008c891db4 Pull complete 
- 390dc935348d Pull complete 
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 1 s
- 46519e7231d2 Extracting 2 s
- 46519e7231d2 Extracting 2 s
- 46519e7231d2 Pull complete 
- nginx Pulled 
-#1 [internal] load local bake definitions
-#1 reading from stdin 1.50kB done
-#1 DONE 0.0s
-unable to prepare context: path "/workspaces/music-embeat-platform/deploy/gateway" not found
 
+#20 [embeat 5/8] RUN pip install --no-cache-dir -e .
+#20 136.4 Building wheels for collected packages: embeat-service
+#20 136.4   Building editable for embeat-service (pyproject.toml): started
+#20 137.0   Building editable for embeat-service (pyproject.toml): finished with status 'done'
+#20 137.0   Created wheel for embeat-service: filename=embeat_service-0.1.0-0.editable-py3-none-any.whl size=1419 sha256=6addd9691c3eb3e02940810611ec5383224264e72a10d6dfea9dc338516efb08
+#20 137.0   Stored in directory: /tmp/pip-ephem-wheel-cache-ul57bknx/wheels/57/0f/98/bb57b2b57b95807699b822a35c022f139d38a02c27922f27ce
+#20 137.0 Successfully built embeat-service
+#20 137.4 Installing collected packages: triton, nvidia-cusparselt-cu12, mpmath, websockets, uvloop, urllib3, typing-extensions, sympy, pyyaml, python-dotenv, protobuf, portalocker, nvidia-nvtx-cu12, nvidia-nvjitlink-cu12, nvidia-nccl-cu12, nvidia-curand-cu12, nvidia-cufft-cu12, nvidia-cuda-runtime-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-cupti-cu12, nvidia-cublas-cu12, numpy, networkx, MarkupSafe, idna, hyperframe, httptools, hpack, h11, fsspec, filelock, click, certifi, annotated-types, annotated-doc, uvicorn, typing-inspection, pydantic-core, nvidia-cusparse-cu12, nvidia-cudnn-cu12, jinja2, httpcore, h2, grpcio, anyio, watchfiles, starlette, pydantic, nvidia-cusolver-cu12, httpx, torch, pydantic-settings, fastapi, qdrant-client, embeat-service
+#20 329.7 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#20 329.7 Successfully installed MarkupSafe-3.0.3 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.14.2 certifi-2026.7.22 click-8.4.2 embeat-service-0.1.0 fastapi-0.141.1 filelock-3.32.3 fsspec-2026.7.0 grpcio-1.83.0 h11-0.16.0 h2-4.4.1 hpack-4.2.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 hyperframe-6.1.0 idna-3.19 jinja2-3.1.6 mpmath-1.3.0 networkx-3.6.1 numpy-2.4.6 nvidia-cublas-cu12-12.4.5.8 nvidia-cuda-cupti-cu12-12.4.127 nvidia-cuda-nvrtc-cu12-12.4.127 nvidia-cuda-runtime-cu12-12.4.127 nvidia-cudnn-cu12-9.1.0.70 nvidia-cufft-cu12-11.2.1.3 nvidia-curand-cu12-10.3.5.147 nvidia-cusolver-cu12-11.6.1.9 nvidia-cusparse-cu12-12.3.1.170 nvidia-cusparselt-cu12-0.6.2 nvidia-nccl-cu12-2.21.5 nvidia-nvjitlink-cu12-12.4.127 nvidia-nvtx-cu12-12.4.127 portalocker-3.2.0 protobuf-7.35.1 pydantic-2.13.4 pydantic-core-2.46.4 pydantic-settings-2.15.0 python-dotenv-1.2.3 pyyaml-6.0.3 qdrant-client-1.19.0 starlette-1.6.0 sympy-1.13.1 torch-2.6.0 triton-3.2.0 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.7.0 uvicorn-0.52.3 uvloop-0.22.1 watchfiles-1.2.0 websockets-17.0.1
+#20 329.9 
+#20 329.9 [notice] A new release of pip is available: 24.0 -> 26.2.1
+#20 329.9 [notice] To update, run: pip install --upgrade pip
+#20 DONE 333.2s
+
+#28 [embeat 6/8] COPY app/ app/
+#28 DONE 0.6s
+
+#29 [embeat 7/8] COPY checkpoints/ checkpoints/
+#29 DONE 0.1s
+
+#30 [embeat 8/8] COPY scripts/ scripts/
+#30 DONE 0.1s
+
+#31 [embeat] exporting to image
+#31 exporting layers
+#31 exporting layers 276.3s done
+#31 exporting manifest sha256:98f09f6d19bb6fdfa1e13a71922d580dbb9a9811923ea458245450859bc27f54
+#31 exporting manifest sha256:98f09f6d19bb6fdfa1e13a71922d580dbb9a9811923ea458245450859bc27f54 0.0s done
+#31 exporting config sha256:d4ab93b081a5ae909ee71aeeaaf7b14d62944b9955846c90f389daa3550357f3 0.0s done
+#31 exporting attestation manifest sha256:cd2c6298d57a34afcff157decc5e8adf0402a785ba1e36cc47af243c014c75c9 0.0s done
+#31 exporting manifest list sha256:06a03fdf2b730c4c2e4aa84b8ae374cef0883826456fea194c7d2db93649e377 0.0s done
+#31 naming to docker.io/library/embeat-embeat:latest done
+#31 unpacking to docker.io/library/embeat-embeat:latest
+#31 unpacking to docker.io/library/embeat-embeat:latest 192.8s done
+#31 DONE 469.4s
+
+#32 [embeat] resolving provenance for metadata file
+#32 DONE 0.1s
+ embeat-embeat  Built
+ embeat-profile  Built
+ embeat-gateway  Built
+ Container embeat-postgres-1  Running
+ Container embeat-qdrant-1  Running
+ Container embeat-profile-1  Creating
+ Container embeat-embeat-1  Creating
+ Container embeat-profile-1  Created
+ Container embeat-embeat-1  Created
+ Container embeat-gateway-1  Creating
+ Container embeat-gateway-1  Created
+ Container embeat-nginx-1  Creating
+ Container embeat-nginx-1  Created
+ Container embeat-qdrant-1  Waiting
+ Container embeat-postgres-1  Waiting
+ Container embeat-qdrant-1  Error
+ Container embeat-postgres-1  Healthy
+ Container embeat-profile-1  Starting
+ Container embeat-profile-1  Started
+dependency failed to start: container embeat-qdrant-1 is unhealthy
