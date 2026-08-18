@@ -1,73 +1,18 @@
 DEPLOY_RC=1
-TIME=Tue Aug 18 12:47:33 UTC 2026
+TIME=Tue Aug 18 13:09:31 UTC 2026
 === docker ps ===
 NAMES               STATUS
+embeat-profile-1    Up 10 seconds (healthy)
 embeat-embeat-1     Restarting (1) Less than a second ago
-embeat-profile-1    Restarting (3) 3 seconds ago
 embeat-postgres-1   Up 15 minutes (healthy)
 embeat-qdrant-1     Up 15 minutes (healthy)
 === profile logs ===
-  File "/usr/local/lib/python3.11/contextlib.py", line 210, in __aenter__
-    return await anext(self.gen)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 240, in merged_lifespan
-    async with original_context(app) as maybe_original_state:
-  File "/usr/local/lib/python3.11/contextlib.py", line 210, in __aenter__
-    return await anext(self.gen)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 240, in merged_lifespan
-    async with original_context(app) as maybe_original_state:
-  File "/usr/local/lib/python3.11/contextlib.py", line 210, in __aenter__
-    return await anext(self.gen)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/app/app/main.py", line 12, in lifespan
-    await app.state.db.init()
-  File "/app/app/core/database.py", line 10, in init
-    self.pool = await asyncpg.create_pool(
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/pool.py", line 439, in _async__init__
-    await self._initialize()
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/pool.py", line 466, in _initialize
-    await first_ch.connect()
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/pool.py", line 153, in connect
-    self._con = await self._pool._get_new_connection()
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/pool.py", line 538, in _get_new_connection
-    con = await self._connect(
-          ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connection.py", line 2443, in connect
-    return await connect_utils._connect(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connect_utils.py", line 1249, in _connect
-    raise last_error or exceptions.TargetServerAttributeNotMatched(
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connect_utils.py", line 1218, in _connect
-    conn = await _connect_addr(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connect_utils.py", line 1054, in _connect_addr
-    return await __connect_addr(params, True, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connect_utils.py", line 1099, in __connect_addr
-    tr, pr = await connector
-             ^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/asyncpg/connect_utils.py", line 969, in _create_ssl_connection
-    tr, pr = await loop.create_connection(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "uvloop/loop.pyx", line 2043, in create_connection
-  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
-ConnectionRefusedError: [Errno 111] Connection refused
-
-ERROR:    Application startup failed. Exiting.
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
+INFO:     127.0.0.1:37064 - "GET /health HTTP/1.1" 200 OK
 === embeat logs ===
-  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
-  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
-  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
-  File "/app/app/main.py", line 7, in <module>
-    from app.core.qdrant_repo import QdrantRepo
-  File "/app/app/core/qdrant_repo.py", line 4, in <module>
-    from qdrant_client.http.models import (
-ImportError: cannot import name 'SearchRequest' from 'qdrant_client.http.models' (/usr/local/lib/python3.11/site-packages/qdrant_client/http/models/__init__.py)
 Traceback (most recent call last):
   File "/usr/local/bin/uvicorn", line 8, in <module>
     sys.exit(main())
@@ -106,27 +51,27 @@ Traceback (most recent call last):
   File "/app/app/main.py", line 7, in <module>
     from app.core.qdrant_repo import QdrantRepo
   File "/app/app/core/qdrant_repo.py", line 4, in <module>
-    from qdrant_client.http.models import (
-ImportError: cannot import name 'SearchRequest' from 'qdrant_client.http.models' (/usr/local/lib/python3.11/site-packages/qdrant_client/http/models/__init__.py)
+    from qdrant_client.models import (
+ImportError: cannot import name 'SortOptions' from 'qdrant_client.models' (/usr/local/lib/python3.11/site-packages/qdrant_client/models/__init__.py)
 === gateway logs ===
 === tail deploy.log ===
 #31 exporting layers
-#31 exporting layers 301.4s done
-#31 exporting manifest sha256:dff6b2ac70a88b5565ad84b3d8abfbcbc72bff2ce56582ec8b49241f38306b3b 0.1s done
-#31 exporting config sha256:3124f049e222e346e3bdbf86e7288592897080b2b0d963c4ecf27482f54c151f 0.0s done
-#31 exporting attestation manifest sha256:a05c2ae96cdf79f669ff89359782a28a0647b0f2fd58f52b2f40cd2aae25ef2b
-#31 exporting attestation manifest sha256:a05c2ae96cdf79f669ff89359782a28a0647b0f2fd58f52b2f40cd2aae25ef2b 0.0s done
-#31 exporting manifest list sha256:5e4c3877c8ab2072855d8f408f6c24d9c89f57c2da40239978edc42f5f7d6068 0.0s done
+#31 exporting layers 305.4s done
+#31 exporting manifest sha256:c8804631a2768c1afc19b3df8f7fa1dfc58391b5573787ee3f949871656c77fc 0.0s done
+#31 exporting config sha256:3e335c810c6152c5f38717427a82c5fcd7dbde9fdd76386764ad8d540cb0203c 0.0s done
+#31 exporting attestation manifest sha256:ba4b91737ab5b10869ba3d50972eae6096973a8e6c6450b2bbdb162e8897e0e0
+#31 exporting attestation manifest sha256:ba4b91737ab5b10869ba3d50972eae6096973a8e6c6450b2bbdb162e8897e0e0 0.0s done
+#31 exporting manifest list sha256:74d2919834bb6cbfdad48589140a57a3370bbfd216cc4cd8c913dc2f010030cf 0.0s done
 #31 naming to docker.io/library/embeat-embeat:latest done
 #31 unpacking to docker.io/library/embeat-embeat:latest
-#31 unpacking to docker.io/library/embeat-embeat:latest 205.8s done
-#31 DONE 507.6s
+#31 unpacking to docker.io/library/embeat-embeat:latest 196.1s done
+#31 DONE 501.7s
 
 #32 [embeat] resolving provenance for metadata file
 #32 DONE 0.1s
+ embeat-profile  Built
  embeat-embeat  Built
  embeat-gateway  Built
- embeat-profile  Built
  Container embeat-qdrant-1  Running
  Container embeat-embeat-1  Creating
  Container embeat-postgres-1  Running
@@ -137,16 +82,16 @@ ImportError: cannot import name 'SearchRequest' from 'qdrant_client.http.models'
  Container embeat-gateway-1  Created
  Container embeat-nginx-1  Creating
  Container embeat-nginx-1  Created
- Container embeat-postgres-1  Waiting
  Container embeat-qdrant-1  Waiting
- Container embeat-qdrant-1  Healthy
- Container embeat-embeat-1  Starting
+ Container embeat-postgres-1  Waiting
  Container embeat-postgres-1  Healthy
  Container embeat-profile-1  Starting
- Container embeat-embeat-1  Started
+ Container embeat-qdrant-1  Healthy
+ Container embeat-embeat-1  Starting
  Container embeat-profile-1  Started
+ Container embeat-embeat-1  Started
  Container embeat-embeat-1  Waiting
  Container embeat-profile-1  Waiting
- Container embeat-profile-1  Error
+ Container embeat-profile-1  Healthy
  Container embeat-embeat-1  Error
-dependency failed to start: container embeat-profile-1 is unhealthy
+dependency failed to start: container embeat-embeat-1 is unhealthy
