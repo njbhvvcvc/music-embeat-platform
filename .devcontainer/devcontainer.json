@@ -15,7 +15,7 @@
     "8090": { "label": "画像服务" },
     "6333": { "label": "Qdrant 面板" }
   },
-  "postCreateCommand": "cd /workspaces/music-embeat-platform && git pull --ff-only 2>&1 | tail -3; until docker info >/dev/null 2>&1; do sleep 2; done; bash deploy/codespaces/deploy.sh",
+  "postCreateCommand": "cd /workspaces/music-embeat-platform && git pull --ff-only 2>&1 | tail -3; until docker info >/dev/null 2>&1; do sleep 2; done; bash deploy/codespaces/deploy-and-report.sh",
   "customizations": {
     "vscode": {
       "extensions": ["ms-azuretools.vscode-docker"]
