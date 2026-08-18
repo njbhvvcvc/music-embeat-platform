@@ -97,9 +97,14 @@ services:
       - "6334:6334"
     volumes:
       - qdrant-data:/qdrant/storage:z
-      - ./qdrant/config.yaml:/qdrant/config/config.yaml:ro
     environment:
+      - QDRANT__STORAGE__MEMMAP_THRESHOLD=0
+      - QDRANT__STORAGE__WAL_CAPACITY_MB=32
       - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__MAX_REQUEST_SIZE_MB=32
+      - QDRANT__SERVICE__REQUEST_TIMEOUT_SEC=30
+      - QDRANT__TELEMETRY_DISABLED=true
       - QDRANT__LOG_LEVEL=INFO
     networks:
       - embeat-net
