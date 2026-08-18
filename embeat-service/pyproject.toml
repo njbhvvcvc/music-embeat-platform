@@ -5,7 +5,7 @@ description = "Embeat recommendation engine"
 requires-python = ">=3.11"
 dependencies = [
     "torch>=2.6.0,<2.7.0",
-    "qdrant-client>=1.13.0,<1.15",
+    "qdrant-client>=1.13.0,<1.14",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
     "pydantic>=2.0.0",

@@ -3,9 +3,12 @@ from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance, VectorParams, Filter, FieldCondition, MatchValue,
-    SortOptions, SortOrder
+    OrderBy
 )
-from qdrant_client.exceptions import UnexpectedResponse
+try:
+    from qdrant_client.exceptions import UnexpectedResponse
+except ImportError:  # qdrant-client < 1.14
+    from qdrant_client.http.exceptions import UnexpectedResponse
 
 from app.config import settings
 
@@ -104,7 +107,7 @@ class QdrantRepo:
             return []
 
     def search_by_genre_popular(self, genre: str, top_k: int = 20) -> list[dict]:
-        """同流派热门搜索 - 使用搜索+排序替代 scroll"""
+        """同流派热门搜索 - 使用 Query API + OrderBy 排序"""
         try:
             # 支持多流派
             must_conditions = []
@@ -116,14 +119,14 @@ class QdrantRepo:
                     )
             query_filter = Filter(must=must_conditions) if must_conditions else None
 
-            hits = self.client.search(
+            resp = self.client.query_points(
                 collection_name=self.collection,
+                query=OrderBy(key="popularity"),
                 query_filter=query_filter,
-                limit=top_k * 2,
+                limit=top_k,
                 with_payload=True,
-                sort=[SortOptions(key="popularity", order=SortOrder.DESC)],
             )
-            return [self._hit_to_dict(h) for h in hits[:top_k]]
+            return [self._hit_to_dict(h) for h in resp.points]
         except Exception as e:
             logger.error(f"Qdrant search_by_genre_popular failed: {e}")
             return []
