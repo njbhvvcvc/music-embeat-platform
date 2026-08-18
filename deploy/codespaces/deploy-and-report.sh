@@ -11,8 +11,14 @@ RC=$?
   echo "TIME=$(date -u)"
   echo "=== docker ps ==="
   docker ps --format 'table {{.Names}}\t{{.Status}}' 2>&1
+  echo "=== profile logs ==="
+  docker logs --tail 50 embeat-profile-1 2>&1
+  echo "=== embeat logs ==="
+  docker logs --tail 50 embeat-embeat-1 2>&1
+  echo "=== gateway logs ==="
+  docker logs --tail 30 embeat-gateway-1 2>&1
   echo "=== tail deploy.log ==="
-  tail -60 /workspaces/deploy.log 2>&1
+  tail -40 /workspaces/deploy.log 2>&1
 } > /workspaces/deploy-status.txt
 
 echo "=== 回传部署结果到 deploy-status 分支 ==="
