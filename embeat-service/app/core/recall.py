@@ -14,10 +14,21 @@ class RecallEngine:
 
     async def recommend(self, seed: str, top_k: int = 20) -> list[dict]:
         seed_track = self.qdrant.get_track(seed)
+        if not seed_track and " - " in seed:
+            title, artist = seed.rsplit(" - ", 1)
+            title = title.strip()
+            artist = artist.strip()
+            matches = self.qdrant.search_by_title(title, artist=artist or None, top_k=1)
+            if not matches:
+                matches = self.qdrant.search_by_title(title, top_k=3)
+            if matches:
+                seed_track = matches[0]
+
         if not seed_track:
             logger.warning(f"Seed track not found: {seed}")
             return []
 
+        seed_id = seed_track.get("track_id", seed)
         artist_genre = seed_track.get("artist_genre", "")
         artist_idx = seed_track.get("artist_idx", -1)
         seed_artist = seed_track.get("artist", "")
@@ -32,7 +43,7 @@ class RecallEngine:
 
             try:
                 if channel == "similar":
-                    vec = self.qdrant.get_vector(seed)
+                    vec = self.qdrant.get_vector(seed_id)
                     if vec:
                         channel_tracks = self.qdrant.search_similar(
                             vec, top_k, genre_filter=artist_genre or None, artist_exclude=seed_artist
@@ -53,7 +64,7 @@ class RecallEngine:
                             t["channel"] = "same_artist"
 
                 elif channel == "related_artist":
-                    vec = self.qdrant.get_vector(seed)
+                    vec = self.qdrant.get_vector(seed_id)
                     if vec:
                         raw = self.qdrant.search_similar(vec, top_k * 2)
                         channel_tracks = [
@@ -69,7 +80,7 @@ class RecallEngine:
 
             for t in channel_tracks:
                 tid = t.get("track_id", "")
-                if tid and tid not in seen and tid != seed:
+                if tid and tid not in seen and tid != seed_id:
                     seen.add(tid)
                     results.append(t)
 

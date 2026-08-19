@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
-    Distance, VectorParams, Filter, FieldCondition, MatchValue,
+    Distance, VectorParams, Filter, FieldCondition, MatchValue, MatchText,
     OrderBy
 )
 try:
@@ -130,6 +130,29 @@ class QdrantRepo:
             return [self._hit_to_dict(h) for h in resp.points]
         except Exception as e:
             logger.error(f"Qdrant search_by_genre_popular failed: {e}")
+            return []
+
+    def search_by_title(
+        self, title: str, artist: str | None = None, top_k: int = 5
+    ) -> list[dict]:
+        """按歌名（+歌手）查找曲目，支持 '歌名 - 歌手' 形式的种子"""
+        try:
+            conditions = [
+                FieldCondition(key="track_name", match=MatchText(value=title))
+            ]
+            if artist:
+                conditions.append(
+                    FieldCondition(key="artist_name", match=MatchValue(value=artist))
+                )
+            points, _ = self.client.scroll(
+                collection_name=self.collection,
+                scroll_filter=Filter(must=conditions),
+                limit=top_k,
+                with_payload=True,
+            )
+            return [self._hit_to_dict(p) for p in points]
+        except Exception as e:
+            logger.error(f"Qdrant search_by_title failed: {e}")
             return []
 
     def get_track(self, track_id: str) -> Optional[dict]:

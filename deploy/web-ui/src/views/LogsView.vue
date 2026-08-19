@@ -33,42 +33,55 @@
 
     <el-card class="logs-container" shadow="hover">
       <div class="logs-list" ref="logsContainer">
-        <div v-for="(log, i) in logs" :key="i" class="log-item" :class="log.level.toLowerCase()">
-          <span class="log-time">{{ log.time }}</span>
+        <div v-for="(log, i) in filteredLogs" :key="i" class="log-item" :class="log.level.toLowerCase()">
           <span class="log-level">{{ log.level }}</span>
           <span class="log-service">[{{ log.service }}]</span>
           <span class="log-msg">{{ log.msg }}</span>
         </div>
+        <el-empty v-if="!filteredLogs.length && !loading" description="暂无日志" :image-size="60" />
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import api from '@/api/client'
 
 const logsContainer = ref()
 const selectedService = ref('all')
 const selectedLevel = ref('')
-const logs = ref([
-  { time: '10:45:12', level: 'INFO', service: 'gateway', msg: 'API 网关启动完成，监听 :8080' },
-  { time: '10:42:03', level: 'INFO', service: 'embeat', msg: 'EmbeatMLP 模型加载成功，64维输出' },
-  { time: '10:35:18', level: 'WARN', service: 'profile', msg: 'PostgreSQL 连接超时，降级为本地缓存' },
-  { time: '10:30:45', level: 'ERROR', service: 'qdrant', msg: '向量检索超时 (seed: track_12345)' },
-  { time: '10:28:00', level: 'INFO', service: 'qdrant', msg: 'Collection embeat_45m 创建完成' },
-  { time: '10:25:11', level: 'INFO', service: 'postgres', msg: '数据库迁移完成，表结构初始化' },
-])
+const logs = ref([])
+const loading = ref(false)
+let timer = null
 
-function refresh() {
-  // 模拟刷新
+const filteredLogs = computed(() => {
+  if (!selectedLevel.value) return logs.value
+  return logs.value.filter((l) => l.level === selectedLevel.value)
+})
+
+async function refresh() {
+  loading.value = true
+  try {
+    const res = await api.get('/v1/ops/logs', {
+      params: { service: selectedService.value, limit: 300 },
+    })
+    logs.value = res.data.data || []
+  } catch (e) {
+    ElMessage.error('日志拉取失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
-  nextTick(() => {
-    if (logsContainer.value) {
-      logsContainer.value.scrollTop = 0
-    }
-  })
+  refresh()
+  timer = setInterval(refresh, 10000)
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
 })
 </script>
 

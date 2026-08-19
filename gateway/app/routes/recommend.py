@@ -1,6 +1,9 @@
+import time
+
 from fastapi import APIRouter, HTTPException
 
 from app.clients.embeat import embeat_client
+from app.core.metrics import metrics
 from app.schemas.recommend import (
     RecommendRequest,
     RecommendResponse,
@@ -13,12 +16,14 @@ router = APIRouter()
 
 @router.post("/recommend", response_model=RecommendResponse)
 async def recommend(req: RecommendRequest):
+    start = time.perf_counter()
     try:
         tracks = await embeat_client.recommend(
             seed=req.seed,
             top_k=req.top_k,
             channels=req.channels,
         )
+        metrics.record((time.perf_counter() - start) * 1000)
         return RecommendResponse(
             code=0,
             data=tracks,
@@ -26,6 +31,7 @@ async def recommend(req: RecommendRequest):
             msg="ok",
         )
     except Exception as e:
+        metrics.record((time.perf_counter() - start) * 1000)
         raise HTTPException(status_code=502, detail=f"推荐请求失败: {str(e)}")
 
 

@@ -8,7 +8,7 @@
     <el-card class="mb-20" shadow="hover">
       <el-form :model="form" label-width="80px">
         <el-form-item label="种子">
-          <el-input v-model="form.seed" placeholder="请输入曲目 ID 或 '歌名 - 歌手'" style="width: 320px" />
+          <el-input v-model="form.seed" placeholder="曲目 ID，或 '歌名 - 歌手'" style="width: 320px" />
         </el-form-item>
         <el-form-item label="召回渠道">
           <el-checkbox-group v-model="form.channels">
@@ -59,7 +59,7 @@ const loading = ref(false)
 const latency = ref(0)
 const results = ref([])
 const form = reactive({
-  seed: '晴天 - Jay Chou',
+  seed: '6fAsiaheQRjXUYaNTzK879',
   channels: ['similar', 'popular', 'same_artist', 'related_artist'],
   top_k: 20,
 })
@@ -68,14 +68,18 @@ async function runRecommend() {
   loading.value = true
   try {
     const start = Date.now()
-    const res = await api.post('/recommend', {
+    const res = await api.post('/v1/recommend', {
       seed: form.seed,
       top_k: form.top_k,
       channels: form.channels.join(','),
     })
     latency.value = Date.now() - start
     results.value = res.data.data
-    ElMessage.success(`获取 ${results.value.length} 条推荐`)
+    if (!results.value.length) {
+      ElMessage.warning('未找到种子曲目，请用曲目 ID 或 "歌名 - 歌手"')
+    } else {
+      ElMessage.success(`获取 ${results.value.length} 条推荐`)
+    }
   } catch (e) {
     ElMessage.error('推荐请求失败')
   } finally {
