@@ -108,10 +108,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, shallowRef } from 'vue'
-import { VChart } from 'vue-echarts'
-import * as echarts from 'echarts'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
+import VChart from 'vue-echarts'
 import api from '@/api/client'
+
+use([CanvasRenderer, BarChart, LineChart, PieChart, GridComponent, TooltipComponent, LegendComponent])
 
 const services = ref([
   { name: 'gateway', label: 'API 网关', port: ':8080', icon: 'el-icon-globe', status: 'healthy', statusText: '正常' },
@@ -307,5 +312,5 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 </style>
 
 <script>
-import 'vue-echarts';
+import 'vue-echarts'
 </script>
