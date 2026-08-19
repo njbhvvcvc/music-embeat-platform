@@ -10,9 +10,10 @@ class RecallEngine:
     def __init__(self, qdrant: QdrantRepo, model: ModelLoader):
         self.qdrant = qdrant
         self.model = model
-        self.channels = [c.strip() for c in settings.embeat_channels.split(",")]
 
-    async def recommend(self, seed: str, top_k: int = 20) -> list[dict]:
+    async def recommend(self, seed: str, top_k: int = 20, channels: str | None = None) -> list[dict]:
+        channel_list = channels or settings.embeat_channels
+        channels_to_run = [c.strip() for c in channel_list.split(",") if c.strip()]
         seed_track = self.qdrant.get_track(seed)
         if not seed_track and " - " in seed:
             title, artist = seed.rsplit(" - ", 1)
@@ -35,7 +36,7 @@ class RecallEngine:
         results: list[dict] = []
         seen = set()
 
-        for channel in self.channels:
+        for channel in channels_to_run:
             channel = channel.strip()
             if not channel:
                 continue

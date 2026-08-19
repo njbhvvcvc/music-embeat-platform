@@ -48,7 +48,7 @@ async def recommend(req: RecommendRequest, request: Request):
         raise HTTPException(status_code=503, detail="Qdrant 未就绪，请先导入向量库")
 
     try:
-        tracks = await engine.recommend(req.seed, req.top_k)
+        tracks = await engine.recommend(req.seed, req.top_k, req.channels)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"推荐失败: {str(e)}")
 
