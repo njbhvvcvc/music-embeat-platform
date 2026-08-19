@@ -100,6 +100,8 @@ def parse_args():
     parser.add_argument("--skip-join", action="store_true",
                         help="跳过 embeat_45m 扫描：从 Qdrant 拉已有 track_id 去重，其余走 CJK 启发式")
     parser.add_argument("--no-cjk", action="store_true", help="关闭 CJK 启发式（join 不到就跳过）")
+    parser.add_argument("--fast", action="store_true",
+                        help="高速模式：下载 parquet 到本地，用 pyarrow 向量化筛选 CJK（避免 Python 逐行遍历 5600 万行）")
     parser.add_argument("--indexing-threshold", type=int, default=10000)
     parser.add_argument("--memmap-threshold", type=int, default=20000)
     return parser.parse_args()
@@ -151,6 +153,120 @@ def vectorize(item: dict, model: ModelLoader | None = None) -> list[float]:
     raise RuntimeError("Model not loaded")
 
 
+def import_fast(args, client, model, existing_ids: set[str], target_genres: set) -> None:
+    """高速模式：下载 parquet 后向量化筛 CJK，批量编码导入"""
+    import pyarrow.compute as pc
+    import pyarrow.parquet as pq
+    from huggingface_hub import hf_hub_download, list_repo_files
+
+    repo = args.dataset
+    files = [f for f in list_repo_files(repo, repo_type="dataset",
+                                        token=os.environ.get("HF_TOKEN")) if f.endswith(".parquet")]
+    if not files:
+        logger.error("未找到 parquet 文件")
+        return
+    logger.info(f"下载 parquet: {files[0]} ...")
+    local = hf_hub_download(repo, files[0], repo_type="dataset", token=os.environ.get("HF_TOKEN"))
+    logger.info(f"✅ parquet 就绪: {local}")
+
+    pf = pq.ParquetFile(local)
+    cols = [c.name for c in pf.schema_arrow]
+    logger.info(f"列: {cols}")
+
+    points: list = []
+    count = joined = cjk = errors = 0
+    batch_size = args.batch_size
+
+    for batch in pf.iter_batches(batch_size=100_000):
+        tb = batch
+        if args.sample and count >= args.sample:
+            break
+        # 组合 artist + track 文本，用正则向量化匹配 CJK
+        atext = pc.binary_join_element_wise(
+            pc.cast(tb["artist_name"], pc.utf8()),
+            pc.cast(tb["track_name"], pc.utf8()),
+            " "
+        )
+        text = pc.cast(atext, pc.utf8())
+        mask = pc.or_(
+            pc.match_substring_regex(text, r"\p{Hangul}"),
+            pc.match_substring_regex(text, r"\p{Hiragana}"),
+        )
+        mask = pc.or_(mask, pc.match_substring_regex(text, r"\p{Katakana}"))
+        mask = pc.or_(mask, pc.match_substring_regex(text, r"\p{Han}"))
+        sub = tb.filter(mask)
+        n = sub.num_rows
+        if n == 0:
+            continue
+
+        for j in range(n):
+            rec = sub.slice(j, 1)
+            track_id = str(rec.column("track_id")[0].as_py())
+            if args.skip_join and track_id in existing_ids:
+                continue
+            artist_genres = guess_cjk_genre(
+                str(rec.column("artist_name")[0].as_py()),
+                str(rec.column("track_name")[0].as_py()),
+            )
+            if not artist_genres:
+                continue
+            if not args.sample and not any(g in artist_genres for g in target_genres):
+                continue
+            features = {
+                "key": rec.column("key")[0].as_py(),
+                "mode": rec.column("mode")[0].as_py(),
+                "time_signature": 4,
+                "tempo": rec.column("tempo")[0].as_py(),
+                "energy": rec.column("energy")[0].as_py(),
+                "valence": rec.column("valence")[0].as_py(),
+                "danceability": rec.column("danceability")[0].as_py(),
+                "loudness": rec.column("loudness")[0].as_py(),
+                "speechiness": rec.column("speechiness")[0].as_py(),
+                "acousticness": rec.column("acousticness")[0].as_py(),
+                "instrumentalness": rec.column("instrumentalness")[0].as_py(),
+            }
+            try:
+                vec = vectorize(features, model)
+            except Exception as e:
+                logger.warning(f"Vectorize failed for {track_id}: {e}")
+                errors += 1
+                continue
+            point = PointStruct(
+                id=track_id_to_uuid(track_id),
+                vector=vec,
+                payload={
+                    "track_id": track_id,
+                    "track_name": str(rec.column("track_name")[0].as_py()),
+                    "artist_name": str(rec.column("artist_name")[0].as_py()),
+                    "album_name": str(rec.column("album_name")[0].as_py()) if "album_name" in cols else "",
+                    "popularity": rec.column("track_popularity")[0].as_py() if "track_popularity" in cols else 0,
+                    "artist_genres": artist_genres,
+                    "artist_idx": -1,
+                    "isrc": "",
+                },
+            )
+            points.append(point)
+            count += 1
+            cjk += 1
+            if len(points) >= batch_size:
+                try:
+                    client.upsert(collection_name=args.collection, points=points)
+                    logger.info(f"  已导入 {count} 条 (cjk={cjk})...")
+                except UnexpectedResponse as e:
+                    logger.error(f"Upsert failed: {e}")
+                    errors += len(points)
+                points = []
+
+    if points:
+        try:
+            client.upsert(collection_name=args.collection, points=points)
+        except UnexpectedResponse as e:
+            logger.error(f"Final upsert failed: {e}")
+            errors += len(points)
+    logger.info(f"✅ 导入完成: 共 {count} 条, CJK 补充 {cjk} 条, 错误 {errors} 条")
+    logger.info(f"   Collection: {args.collection}")
+
+
 def main():
     args = parse_args()
 
@@ -188,6 +304,26 @@ def main():
     join_conn = None
     lookup = None
     existing_ids: set[str] = set()
+
+    if args.fast:
+        # 高速模式：仅支持 --skip-join 式去重（从 Qdrant 拉已有 track_id）
+        offset = None
+        while True:
+            res = client.scroll(
+                collection_name=args.collection,
+                limit=1000,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for p in res[0]:
+                existing_ids.add(str(p.payload.get("track_id", "")))
+            if res[1] is None:
+                break
+            offset = res[1]
+        logger.info(f"已从 collection 读取 {len(existing_ids)} 个已有 track_id")
+        import_fast(args, client, model, existing_ids, target_genres)
+        return
 
     if args.skip_join:
         # 从 Qdrant 拉取已有 track_id，用于去重（只对 CJK 补充生效）
@@ -311,7 +447,6 @@ def main():
             logger.error(f"Final upsert failed: {e}")
             errors += len(points)
 
-    join_conn = None
     if join_conn is not None:
         join_conn.close()
     logger.info(f"✅ 导入完成: 共 {count} 条, join 补齐 {joined} 条, CJK 补充 {cjk} 条, 错误 {errors} 条")
