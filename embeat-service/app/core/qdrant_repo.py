@@ -3,7 +3,7 @@ from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance, VectorParams, Filter, FieldCondition, MatchValue, MatchText,
-    OrderBy
+    MinShould, OrderBy
 )
 try:
     from qdrant_client.exceptions import UnexpectedResponse
@@ -43,6 +43,30 @@ class QdrantRepo:
     def invalidate_ready_cache(self):
         self._ready_cache = False
 
+    def _genre_conditions(self, genre_str: str) -> list:
+        """把逗号拼接的流派串转成 MatchText 条件（取每段首个词）"""
+        conditions = []
+        for g in genre_str.split(","):
+            g = g.strip()
+            if not g:
+                continue
+            word = g.split()[0]
+            conditions.append(
+                FieldCondition(key="artist_genres", match=MatchText(text=word))
+            )
+        return conditions
+
+    def _genre_filter(self, genre_str: str | None) -> "Filter | None":
+        """流派过滤：单个流派用 must，多个用 min_should(>=1)"""
+        if not genre_str:
+            return None
+        conds = self._genre_conditions(genre_str)
+        if not conds:
+            return None
+        if len(conds) == 1:
+            return Filter(must=conds)
+        return Filter(min_should=MinShould(conditions=conds, min_count=1))
+
     def search_similar(
         self,
         vector: list[float],
@@ -52,28 +76,17 @@ class QdrantRepo:
     ) -> list[dict]:
         """向量相似度搜索，支持流派过滤和艺人排除"""
         try:
-            must_conditions = []
-            if genre_filter:
-                # 支持多流派，用逗号分隔
-                for g in genre_filter.split(","):
-                    g = g.strip()
-                    if g:
-                        must_conditions.append(
-                            FieldCondition(key="artist_genres", match=MatchValue(value=g))
-                        )
-
-            query_filter = Filter(must=must_conditions) if must_conditions else None
+            query_filter = self._genre_filter(genre_filter)
 
             # 如果需要排除某个艺人
             if artist_exclude:
+                not_cond = [
+                    FieldCondition(key="artist_name", match=MatchValue(value=artist_exclude))
+                ]
                 if query_filter is None:
-                    query_filter = Filter(
-                        must_not=[FieldCondition(key="artist_name", match=MatchValue(value=artist_exclude))]
-                    )
+                    query_filter = Filter(must_not=not_cond)
                 else:
-                    query_filter.must_not = [
-                        FieldCondition(key="artist_name", match=MatchValue(value=artist_exclude))
-                    ]
+                    query_filter.must_not = not_cond
 
             hits = self.client.search(
                 collection_name=self.collection,
@@ -111,15 +124,7 @@ class QdrantRepo:
     def search_by_genre_popular(self, genre: str, top_k: int = 20) -> list[dict]:
         """同流派热门搜索 - 使用 Query API + OrderBy 排序"""
         try:
-            # 支持多流派
-            must_conditions = []
-            for g in genre.split(","):
-                g = g.strip()
-                if g:
-                    must_conditions.append(
-                        FieldCondition(key="artist_genres", match=MatchValue(value=g))
-                    )
-            query_filter = Filter(must=must_conditions) if must_conditions else None
+            query_filter = self._genre_filter(genre)
 
             resp = self.client.query_points(
                 collection_name=self.collection,
