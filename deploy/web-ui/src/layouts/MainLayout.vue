@@ -29,7 +29,7 @@
         :collapse-transition="false"
       >
         <el-menu-item index="/" :disabled="sidebarCollapsed">
-          <el-icon><Dashboard /></el-icon>
+          <el-icon><Odometer /></el-icon>
           <template #title>仪表盘</template>
         </el-menu-item>
 
@@ -128,8 +128,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import {
-  Dashboard, Monitor, Document, Setting, User, SwitchButton,
-  Fold, Menu, Dashboard as DashboardIcon, Headset
+  Odometer, Monitor, Document, Setting, User, SwitchButton,
+  Fold, Menu, Headset
 } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
 
