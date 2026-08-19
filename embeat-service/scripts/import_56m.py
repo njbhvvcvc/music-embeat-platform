@@ -184,8 +184,8 @@ def import_fast(args, client, model, existing_ids: set[str], target_genres: set)
             break
         # 组合 artist + track 文本，用正则向量化匹配 CJK
         atext = pc.binary_join_element_wise(
-            pc.cast(tb["artist_name"], pc.utf8()),
-            pc.cast(tb["track_name"], pc.utf8()),
+            pc.cast(tb["artist_name"], pa.string()),
+            pc.cast(tb["track_name"], pa.string()),
             " "
         )
         text = pc.cast(atext, pa.string())
