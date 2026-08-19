@@ -155,6 +155,7 @@ def vectorize(item: dict, model: ModelLoader | None = None) -> list[float]:
 
 def import_fast(args, client, model, existing_ids: set[str], target_genres: set) -> None:
     """高速模式：下载 parquet 后向量化筛 CJK，批量编码导入"""
+    import pyarrow as pa
     import pyarrow.compute as pc
     import pyarrow.parquet as pq
     from huggingface_hub import hf_hub_download, list_repo_files
@@ -187,7 +188,7 @@ def import_fast(args, client, model, existing_ids: set[str], target_genres: set)
             pc.cast(tb["track_name"], pc.utf8()),
             " "
         )
-        text = pc.cast(atext, pc.utf8())
+        text = pc.cast(atext, pa.string())
         mask = pc.or_(
             pc.match_substring_regex(text, r"\p{Hangul}"),
             pc.match_substring_regex(text, r"\p{Hiragana}"),
