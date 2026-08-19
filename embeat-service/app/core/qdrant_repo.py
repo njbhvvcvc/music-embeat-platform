@@ -3,7 +3,7 @@ from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance, VectorParams, Filter, FieldCondition, MatchValue, MatchText,
-    MinShould, OrderBy
+    MinShould
 )
 try:
     from qdrant_client.exceptions import UnexpectedResponse
@@ -109,31 +109,30 @@ class QdrantRepo:
             query_filter = Filter(
                 must=[FieldCondition(key="artist_idx", match=MatchValue(value=artist_idx))]
             )
-            resp = self.client.query_points(
+            points, _ = self.client.scroll(
                 collection_name=self.collection,
-                query=OrderBy(key="popularity"),
-                query_filter=query_filter,
+                scroll_filter=query_filter,
                 limit=top_k,
+                order_by="popularity",
                 with_payload=True,
             )
-            return [self._hit_to_dict(h) for h in resp.points]
+            return [self._hit_to_dict(p) for p in points]
         except Exception as e:
             logger.error(f"Qdrant search_by_artist failed: {e}")
             return []
 
     def search_by_genre_popular(self, genre: str, top_k: int = 20) -> list[dict]:
-        """同流派热门搜索 - 使用 Query API + OrderBy 排序"""
+        """同流派热门搜索 - scroll + order_by popularity"""
         try:
             query_filter = self._genre_filter(genre)
-
-            resp = self.client.query_points(
+            points, _ = self.client.scroll(
                 collection_name=self.collection,
-                query=OrderBy(key="popularity"),
-                query_filter=query_filter,
+                scroll_filter=query_filter,
                 limit=top_k,
+                order_by="popularity",
                 with_payload=True,
             )
-            return [self._hit_to_dict(h) for h in resp.points]
+            return [self._hit_to_dict(p) for p in points]
         except Exception as e:
             logger.error(f"Qdrant search_by_genre_popular failed: {e}")
             return []

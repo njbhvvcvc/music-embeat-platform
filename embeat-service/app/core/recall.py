@@ -86,9 +86,31 @@ class RecallEngine:
                     results.append(t)
 
         deduped = self._deduplicate_isrc(results)
-        reranked = self._rerank(deduped)
+        reranked = self._interleave_by_channel(deduped)
         reranked = self._limit_same_artist(reranked, max_ratio=0.3)
         return reranked[:top_k]
+
+    def _interleave_by_channel(self, tracks: list[dict]) -> list[dict]:
+        """按渠道轮询交错，避免单一高分渠道刷屏"""
+        by_channel: dict[str, list[dict]] = {}
+        order: list[str] = []
+        for t in tracks:
+            c = t.get("channel", "")
+            if c not in by_channel:
+                by_channel[c] = []
+                order.append(c)
+            by_channel[c].append(t)
+        result: list[dict] = []
+        i = 0
+        active = True
+        while active:
+            active = False
+            for c in order:
+                if i < len(by_channel[c]):
+                    result.append(by_channel[c][i])
+                    active = True
+            i += 1
+        return result
 
     def _deduplicate_isrc(self, tracks: list[dict]) -> list[dict]:
         seen = set()
@@ -99,9 +121,6 @@ class RecallEngine:
                 seen.add(isrc)
                 result.append(t)
         return result
-
-    def _rerank(self, tracks: list[dict]) -> list[dict]:
-        return sorted(tracks, key=lambda x: x.get("score", 0), reverse=True)
 
     def _limit_same_artist(self, tracks: list[dict], max_ratio: float = 0.3) -> list[dict]:
         if not tracks:
