@@ -116,7 +116,7 @@ class RecallEngine:
         seen = set()
         result = []
         for t in tracks:
-            isrc = t.get("isrc", t.get("track_id", ""))
+            isrc = t.get("isrc") or t.get("track_id", "")
             if isrc and isrc not in seen:
                 seen.add(isrc)
                 result.append(t)
