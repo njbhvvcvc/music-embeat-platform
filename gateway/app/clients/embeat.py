@@ -37,14 +37,70 @@ class EmbeatClient:
 
     async def recommend(
         self,
-        seed: str,
+        seed: str = "",
         top_k: int = 20,
         channels: str = "similar,popular,same_artist,related_artist",
-    ) -> list[RecommendTrack]:
+    ) -> dict:
         data = await self._request_with_retry(
             "POST",
             "/api/v1/recommend",
             json={"seed": seed, "top_k": top_k, "channels": channels},
+        )
+        tracks = []
+        for item in data.get("data", []):
+            try:
+                tracks.append(RecommendTrack(**item))
+            except Exception:
+                continue
+        seed_track = None
+        if data.get("seed_track"):
+            try:
+                seed_track = RecommendTrack(**data["seed_track"])
+            except Exception:
+                seed_track = None
+        return {
+            "code": data.get("code", 0),
+            "data": tracks,
+            "total": data.get("total", len(tracks)),
+            "seed": data.get("seed", ""),
+            "seed_track": seed_track,
+            "msg": data.get("msg", "ok"),
+        }
+
+    async def recommend_batch(
+        self,
+        seeds: list[str],
+        top_k: int = 20,
+        channels: str = "similar,popular,same_artist,related_artist",
+    ) -> list[dict]:
+        data = await self._request_with_retry(
+            "POST",
+            "/api/v1/recommend/batch",
+            json={"seeds": seeds, "top_k": top_k, "channels": channels},
+        )
+        result = []
+        for item in data.get("data", []):
+            try:
+                tracks = [RecommendTrack(**t) for t in item.get("tracks", [])]
+                seed_track = None
+                if item.get("seed_track"):
+                    seed_track = RecommendTrack(**item["seed_track"])
+                result.append(
+                    {
+                        "seed": item.get("seed", ""),
+                        "seed_track": seed_track,
+                        "tracks": tracks,
+                    }
+                )
+            except Exception:
+                continue
+        return result
+
+    async def search_tracks(self, keyword: str, limit: int = 20) -> list[RecommendTrack]:
+        data = await self._request_with_retry(
+            "GET",
+            "/api/v1/tracks/search",
+            params={"keyword": keyword, "limit": limit},
         )
         tracks = []
         for item in data.get("data", []):

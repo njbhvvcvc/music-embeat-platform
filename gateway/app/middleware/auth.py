@@ -17,6 +17,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            auth = f"Bearer {request.query_params.get('token', '')}"
         if auth.startswith("Bearer "):
             token = auth[7:]
             try:

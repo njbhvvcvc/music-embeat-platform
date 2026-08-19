@@ -174,6 +174,51 @@ class QdrantRepo:
             logger.error(f"Qdrant search_by_title failed: {e}")
             return []
 
+    def search_tracks(self, keyword: str, limit: int = 20) -> list[dict]:
+        """按关键字在曲库中搜索曲目（歌名/歌手子串匹配），用于选歌"""
+        try:
+            conds = [
+                FieldCondition(key="track_name", match=MatchText(text=keyword)),
+                FieldCondition(key="artist_name", match=MatchText(text=keyword)),
+            ]
+            query_filter = Filter(
+                should=conds, min_should=MinShould(conditions=conds, min_count=1)
+            )
+            points, _ = self.client.scroll(
+                collection_name=self.collection,
+                scroll_filter=query_filter,
+                limit=limit,
+                with_payload=True,
+            )
+            return [self._hit_to_dict(p) for p in points]
+        except Exception as e:
+            logger.error(f"Qdrant search_tracks failed: {e}")
+            return []
+
+    def get_random_tracks(self, limit: int = 5) -> list[dict]:
+        """随机采样曲目，用于'随便听'种子"""
+        try:
+            from qdrant_client.models import QuerySample
+
+            res = self.client.query_points(
+                collection_name=self.collection,
+                query=QuerySample(limit=limit),
+                with_payload=True,
+            )
+            return [self._hit_to_dict(p) for p in res.points]
+        except Exception as e:
+            logger.error(f"Qdrant get_random_tracks failed: {e}")
+            try:
+                points, _ = self.client.scroll(
+                    collection_name=self.collection,
+                    limit=limit,
+                    with_payload=True,
+                )
+                return [self._hit_to_dict(p) for p in points]
+            except Exception as e2:
+                logger.error(f"Qdrant get_random_tracks fallback failed: {e2}")
+                return []
+
     def get_track(self, track_id: str) -> Optional[dict]:
         """获取单个曲目"""
         try:

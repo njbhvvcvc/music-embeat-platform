@@ -14,6 +14,18 @@ class RecallEngine:
     async def recommend(self, seed: str, top_k: int = 20, channels: str | None = None) -> list[dict]:
         channel_list = channels or settings.embeat_channels
         channels_to_run = [c.strip() for c in channel_list.split(",") if c.strip()]
+        seed_track = await self.resolve_seed(seed)
+        if not seed_track:
+            logger.warning(f"Seed track not found: {seed or '(random)'}")
+            return []
+        return self._recommend_from_track(seed_track, top_k, channels_to_run)
+
+    async def resolve_seed(self, seed: str) -> dict | None:
+        """解析种子：支持 track_id、'歌名 - 歌手'、空串(随机采样)"""
+        if not seed or not seed.strip():
+            random_tracks = self.qdrant.get_random_tracks(1)
+            return random_tracks[0] if random_tracks else None
+
         seed_track = self.qdrant.get_track(seed)
         if not seed_track and " - " in seed:
             title, artist = seed.rsplit(" - ", 1)
@@ -24,12 +36,12 @@ class RecallEngine:
                 matches = self.qdrant.search_by_title(title, top_k=3)
             if matches:
                 seed_track = matches[0]
+        return seed_track
 
-        if not seed_track:
-            logger.warning(f"Seed track not found: {seed}")
-            return []
-
-        seed_id = seed_track.get("track_id", seed)
+    def _recommend_from_track(
+        self, seed_track: dict, top_k: int, channels_to_run: list[str]
+    ) -> list[dict]:
+        seed_id = seed_track.get("track_id", "")
         artist_genre = seed_track.get("artist_genre", "")
         artist_idx = seed_track.get("artist_idx", -1)
         seed_artist = seed_track.get("artist", "")
