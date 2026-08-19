@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import search, playback, recommend, profile as profile_routes, health
+from app.routes import search, playback, recommend, profile as profile_routes, health, auth
 from app.middleware.ratelimit import RateLimitMiddleware
 from app.middleware.auth import AuthMiddleware
 
@@ -33,3 +33,4 @@ app.include_router(search.router, prefix="/api/v1", tags=["search"])
 app.include_router(playback.router, prefix="/api/v1", tags=["playback"])
 app.include_router(recommend.router, prefix="/api/v1", tags=["recommend"])
 app.include_router(profile_routes.router, prefix="/api/v1", tags=["profile"])
+app.include_router(auth.router, prefix="/api", tags=["auth"])

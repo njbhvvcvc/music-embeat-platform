@@ -23,6 +23,7 @@ services:
       - "8080:8080"
     environment:
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-embeat123}
       - GD_API_BASE=${GD_API_BASE:-https://music-api.gdstudio.xyz/api.php}
       - GD_API_RATE_LIMIT=${GD_API_RATE_LIMIT:-50}
       - GD_API_RATE_WINDOW=${GD_API_RATE_WINDOW:-300}

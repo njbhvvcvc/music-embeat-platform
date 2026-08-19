@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     jwt_secret: str = "change-me"
+    admin_password: str = "embeat123"
     gd_api_base: str = "https://music-api.gdstudio.xyz/api.php"
     gd_api_rate_limit: int = 50
     gd_api_rate_window: int = 300
