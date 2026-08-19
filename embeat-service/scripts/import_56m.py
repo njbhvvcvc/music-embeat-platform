@@ -32,6 +32,8 @@ from app.core.track_id import track_id_to_uuid
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+for _l in ("datasets", "datasets.arrow_dataset", "huggingface_hub", "filelock"):
+    logging.getLogger(_l).setLevel(logging.ERROR)
 
 CN_GENRES = {
     "c-pop", "mandopop", "taiwan pop", "zhongguo feng",
@@ -95,6 +97,8 @@ def parse_args():
     parser.add_argument("--model-path", default="/app/checkpoints/EmbeatMLP")
     parser.add_argument("--join-db", default="/tmp/embeat_join.db", help="join 查询库位置")
     parser.add_argument("--rebuild-join", action="store_true", help="重建 join 查询库")
+    parser.add_argument("--skip-join", action="store_true",
+                        help="跳过 embeat_45m 扫描：从 Qdrant 拉已有 track_id 去重，其余走 CJK 启发式")
     parser.add_argument("--no-cjk", action="store_true", help="关闭 CJK 启发式（join 不到就跳过）")
     parser.add_argument("--indexing-threshold", type=int, default=10000)
     parser.add_argument("--memmap-threshold", type=int, default=20000)
@@ -181,8 +185,31 @@ def main():
         )
         logger.info(f"✅ 创建 Collection: {args.collection}")
 
-    join_conn = build_join_db(args, target_genres)
-    lookup = join_conn.cursor()
+    join_conn = None
+    lookup = None
+    existing_ids: set[str] = set()
+
+    if args.skip_join:
+        # 从 Qdrant 拉取已有 track_id，用于去重（只对 CJK 补充生效）
+        offset = None
+        while True:
+            res = client.scroll(
+                collection_name=args.collection,
+                limit=1000,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for p in res[0]:
+                existing_ids.add(str(p.payload.get("track_id", "")))
+            if res[1] is None:
+                break
+            offset = res[1]
+        logger.info(f"已从 collection 读取 {len(existing_ids)} 个已有 track_id")
+        lookup = None
+    else:
+        join_conn = build_join_db(args, target_genres)
+        lookup = join_conn.cursor()
 
     ds = load_dataset(args.dataset, split="train", streaming=True)
     points = []
@@ -199,11 +226,16 @@ def main():
             continue
 
         # 从 join 库取基础字段
-        lookup.execute(
-            "SELECT artist_genres, artist_idx, isrc, time_signature FROM join_map WHERE track_id=?",
-            (track_id,),
-        )
-        row = lookup.fetchone()
+        if args.skip_join:
+            if track_id in existing_ids:
+                continue
+            row = None
+        else:
+            lookup.execute(
+                "SELECT artist_genres, artist_idx, isrc, time_signature FROM join_map WHERE track_id=?",
+                (track_id,),
+            )
+            row = lookup.fetchone()
 
         if row:
             artist_genres, artist_idx, isrc, time_signature = row
@@ -279,7 +311,9 @@ def main():
             logger.error(f"Final upsert failed: {e}")
             errors += len(points)
 
-    join_conn.close()
+    join_conn = None
+    if join_conn is not None:
+        join_conn.close()
     logger.info(f"✅ 导入完成: 共 {count} 条, join 补齐 {joined} 条, CJK 补充 {cjk} 条, 错误 {errors} 条")
     logger.info(f"   Collection: {args.collection}")
 
