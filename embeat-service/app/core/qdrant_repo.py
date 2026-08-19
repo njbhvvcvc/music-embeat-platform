@@ -137,16 +137,30 @@ class QdrantRepo:
     ) -> list[dict]:
         """按歌名（+歌手）查找曲目，支持 '歌名 - 歌手' 形式的种子"""
         try:
-            conditions = [
-                FieldCondition(key="track_name", match=MatchText(value=title))
-            ]
+            artist_cond = None
             if artist:
-                conditions.append(
-                    FieldCondition(key="artist_name", match=MatchValue(value=artist))
+                artist_cond = FieldCondition(
+                    key="artist_name", match=MatchValue(value=artist)
                 )
+
+            exact = [FieldCondition(key="track_name", match=MatchValue(value=title))]
+            if artist_cond:
+                exact.append(artist_cond)
             points, _ = self.client.scroll(
                 collection_name=self.collection,
-                scroll_filter=Filter(must=conditions),
+                scroll_filter=Filter(must=exact),
+                limit=top_k,
+                with_payload=True,
+            )
+            if points:
+                return [self._hit_to_dict(p) for p in points]
+
+            text = [FieldCondition(key="track_name", match=MatchText(text=title))]
+            if artist_cond:
+                text.append(artist_cond)
+            points, _ = self.client.scroll(
+                collection_name=self.collection,
+                scroll_filter=Filter(must=text),
                 limit=top_k,
                 with_payload=True,
             )
