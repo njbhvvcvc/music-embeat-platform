@@ -3,6 +3,7 @@ import time
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
+from app.config import settings
 from app.core import ops
 from app.core.metrics import metrics
 
@@ -53,6 +54,45 @@ async def ops_logs(service: str = "all", limit: int = 300):
             )
     logs.reverse()
     return {"code": 0, "data": logs}
+
+
+@router.get("/ops/metrics")
+async def ops_metrics():
+    from app.core import monitor
+
+    qps, avg_latency = metrics.snapshot()
+    try:
+        stats = await ops.container_stats()
+    except Exception:
+        stats = {}
+    try:
+        states = await ops.container_states()
+    except Exception:
+        states = {}
+
+    containers = []
+    for label, cid in ops.SERVICES:
+        st = stats.get(cid, {})
+        containers.append({
+            "name": label,
+            "cid": cid,
+            "state": states.get(cid, "unknown"),
+            "cpu": st.get("cpu", ""),
+            "mem": st.get("mem", ""),
+        })
+
+    return {
+        "code": 0,
+        "cpu_percent": monitor.host_cpu_percent(),
+        "memory": monitor.host_memory(),
+        "disk": monitor.disk_usage("/"),
+        "snapshot_disk": monitor.disk_usage(settings.snapshot_dir),
+        "containers": containers,
+        "qdrant": monitor.qdrant_collection_info(),
+        "qps": qps,
+        "avg_latency_ms": avg_latency,
+        "now": int(time.time() * 1000),
+    }
 
 
 @router.get("/recommend/stats")

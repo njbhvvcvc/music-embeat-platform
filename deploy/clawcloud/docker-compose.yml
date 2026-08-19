@@ -12,6 +12,8 @@ volumes:
     driver: local
   postgres-data:
     driver: local
+  snapshots-data:
+    driver: local
 
 services:
   # ==================== A1: API 网关 ====================
@@ -29,8 +31,14 @@ services:
       - GD_API_RATE_WINDOW=${GD_API_RATE_WINDOW:-300}
       - EMBEAT_BASE=http://embeat:7860
       - PROFILE_BASE=http://profile:8090
+      - QDRANT_BASE=${QDRANT_BASE:-http://qdrant:6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-embeat_45m}
+      - MODELSCOPE_NAMESPACE=${MODELSCOPE_NAMESPACE:-xuliuyangsai}
+      - MODELSCOPE_DATASET=${MODELSCOPE_DATASET:-embeat-qdrant-backup}
+      - SNAPSHOT_DIR=/snapshots
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - snapshots-data:/snapshots
     depends_on:
       embeat:
         condition: service_healthy
@@ -100,6 +108,7 @@ services:
       - "6334:6334"
     volumes:
       - qdrant-data:/qdrant/storage:z
+      - snapshots-data:/qdrant/storage/snapshots
     environment:
       - QDRANT__SERVICE__HTTP_PORT=6333
       - QDRANT__SERVICE__GRPC_PORT=6334
