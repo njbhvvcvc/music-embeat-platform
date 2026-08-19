@@ -59,7 +59,7 @@ class QdrantRepo:
                     g = g.strip()
                     if g:
                         must_conditions.append(
-                            FieldCondition(key="artist_genre", match=MatchValue(value=g))
+                            FieldCondition(key="artist_genres", match=MatchValue(value=g))
                         )
 
             query_filter = Filter(must=must_conditions) if must_conditions else None
@@ -96,13 +96,14 @@ class QdrantRepo:
             query_filter = Filter(
                 must=[FieldCondition(key="artist_idx", match=MatchValue(value=artist_idx))]
             )
-            hits = self.client.search(
+            resp = self.client.query_points(
                 collection_name=self.collection,
+                query=OrderBy(key="popularity"),
                 query_filter=query_filter,
                 limit=top_k,
                 with_payload=True,
             )
-            return [self._hit_to_dict(h) for h in hits]
+            return [self._hit_to_dict(h) for h in resp.points]
         except Exception as e:
             logger.error(f"Qdrant search_by_artist failed: {e}")
             return []
@@ -116,7 +117,7 @@ class QdrantRepo:
                 g = g.strip()
                 if g:
                     must_conditions.append(
-                        FieldCondition(key="artist_genre", match=MatchValue(value=g))
+                        FieldCondition(key="artist_genres", match=MatchValue(value=g))
                     )
             query_filter = Filter(must=must_conditions) if must_conditions else None
 
