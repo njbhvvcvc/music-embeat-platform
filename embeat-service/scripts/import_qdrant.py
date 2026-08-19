@@ -27,6 +27,7 @@ except ImportError:  # qdrant-client < 1.14
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.core.model_loader import ModelLoader
+from app.core.track_id import track_id_to_uuid
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -184,9 +185,10 @@ def main():
         try:
             vec = vectorize(item, model)
             point = PointStruct(
-                id=track_id,
+                id=track_id_to_uuid(track_id),
                 vector=vec,
                 payload={
+                    "track_id": track_id,
                     "track_name": item.get("track_name", ""),
                     "artist_name": item.get("artist_name", ""),
                     "album_name": item.get("album_name", ""),

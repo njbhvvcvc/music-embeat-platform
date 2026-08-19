@@ -11,6 +11,7 @@ except ImportError:  # qdrant-client < 1.14
     from qdrant_client.http.exceptions import UnexpectedResponse
 
 from app.config import settings
+from app.core.track_id import track_id_to_uuid
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ class QdrantRepo:
         try:
             hits = self.client.retrieve(
                 collection_name=self.collection,
-                ids=[track_id],
+                ids=[track_id_to_uuid(track_id)],
                 with_payload=True,
             )
             if hits:
@@ -151,7 +152,7 @@ class QdrantRepo:
         try:
             hits = self.client.retrieve(
                 collection_name=self.collection,
-                ids=[track_id],
+                ids=[track_id_to_uuid(track_id)],
                 with_vectors=True,
             )
             if hits:
@@ -163,7 +164,7 @@ class QdrantRepo:
 
     def _hit_to_dict(self, hit) -> dict:
         return {
-            "track_id": hit.id,
+            "track_id": hit.payload.get("track_id", hit.id),
             "title": hit.payload.get("track_name", ""),
             "artist": hit.payload.get("artist_name", ""),
             "album": hit.payload.get("album_name", ""),
