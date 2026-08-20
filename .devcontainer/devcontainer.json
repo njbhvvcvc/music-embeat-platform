@@ -16,8 +16,8 @@
     "6333": { "label": "Qdrant 面板", "visibility": "public" }
   },
   "postCreateCommand": "cd /workspaces/music-embeat-platform && git pull --ff-only 2>&1 | tail -3; until docker info >/dev/null 2>&1; do sleep 2; done; bash deploy/codespaces/deploy-and-report.sh",
-  "postStartCommand": "cd /workspaces/music-embeat-platform && git fetch origin main 2>/dev/null; git reset --hard origin/main 2>/dev/null; until docker info >/dev/null 2>&1; do sleep 2; done; if docker compose -p embeat -f deploy/clawcloud/docker-compose.yml ps --services | grep -q .; then docker compose -p embeat -f deploy/clawcloud/docker-compose.yml up -d --force-recreate; else sleep 5; bash deploy/codespaces/deploy-and-report.sh; fi",
-  "postAttachCommand": "cd /workspaces/music-embeat-platform && git fetch origin main 2>/dev/null; git reset --hard origin/main 2>/dev/null; until docker info >/dev/null 2>&1; do sleep 2; done; docker compose -p embeat -f deploy/clawcloud/docker-compose.yml up -d --force-recreate; bash deploy/codespaces/deploy-and-report.sh",
+  "postStartCommand": "cd /workspaces/music-embeat-platform && git fetch origin main 2>/dev/null; git reset --hard origin/main 2>/dev/null; until docker info >/dev/null 2>&1; do sleep 2; done; if docker compose -p embeat -f deploy/clawcloud/docker-compose.yml ps --services | grep -q .; then docker compose -p embeat -f deploy/clawcloud/docker-compose.yml up -d --build --force-recreate; else sleep 5; bash deploy/codespaces/deploy-and-report.sh; fi",
+  "postAttachCommand": "cd /workspaces/music-embeat-platform && git fetch origin main 2>/dev/null; git reset --hard origin/main 2>/dev/null; until docker info >/dev/null 2>&1; do sleep 2; done; docker compose -p embeat -f deploy/clawcloud/docker-compose.yml up -d --build --force-recreate; bash deploy/codespaces/deploy-and-report.sh",
   "customizations": {
     "vscode": {
       "extensions": ["ms-azuretools.vscode-docker"]
