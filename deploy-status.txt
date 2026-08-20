@@ -1,75 +1,184 @@
-DEPLOY_RC=0
-TIME=Thu Aug 20 03:32:39 UTC 2026
+DEPLOY_RC=1
+TIME=Thu Aug 20 09:28:01 UTC 2026
 === docker ps ===
 NAMES               STATUS
-embeat-nginx-1      Up 5 seconds (health: starting)
-embeat-gateway-1    Up 6 seconds (health: starting)
-embeat-embeat-1     Up 56 seconds (healthy)
+embeat-nginx-1      Up About a minute (healthy)
+embeat-gateway-1    Up About a minute (healthy)
+embeat-embeat-1     Up About a minute (healthy)
 embeat-profile-1    Up About a minute (healthy)
-embeat-qdrant-1     Up 2 minutes (healthy)
-embeat-postgres-1   Up 2 minutes (healthy)
+embeat-qdrant-1     Up About a minute (unhealthy)
+embeat-postgres-1   Up About a minute (healthy)
 === profile logs ===
+INFO:     127.0.0.1:43150 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55824 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33006 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44902 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34500 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51416 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54752 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53744 - "GET /health HTTP/1.1" 200 OK
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
-INFO:     127.0.0.1:42126 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37464 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42590 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45660 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.18.0.1:34036 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34960 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53008 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48120 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33896 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34680 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54346 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48460 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50024 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47706 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59908 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48148 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57716 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40422 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50210 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59930 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48478 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50342 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56794 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58110 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37244 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38666 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59870 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55228 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44186 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59572 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36260 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60010 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33184 - "GET /health HTTP/1.1" 200 OK
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
+INFO:     127.0.0.1:51062 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55744 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57866 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43612 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33598 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47158 - "GET /health HTTP/1.1" 200 OK
 === embeat logs ===
+INFO:     127.0.0.1:49434 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44252 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53702 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54536 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57338 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52418 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48164 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37490 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56700 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59350 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54366 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40122 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57404 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40046 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58724 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56488 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55404 - "GET /health HTTP/1.1" 200 OK
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:7860 (Press CTRL+C to quit)
-INFO:     127.0.0.1:45364 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.18.0.1:41654 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34576 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46352 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57824 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56122 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33166 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37996 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54440 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39640 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38948 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33586 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35120 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44070 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51802 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56592 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48034 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41686 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35562 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55018 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39274 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36926 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35846 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52550 - "GET /health HTTP/1.1" 200 OK
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:7860 (Press CTRL+C to quit)
+INFO:     127.0.0.1:57768 - "GET /health HTTP/1.1" 200 OK
 === gateway logs ===
+INFO:     127.0.0.1:49812 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60510 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53962 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60100 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54100 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59424 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41018 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37184 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56808 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53760 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48762 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42960 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59422 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35094 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57112 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55158 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55762 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41340 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53392 - "GET /health HTTP/1.1" 200 OK
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
-INFO:     172.18.0.1:33232 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.18.0.1:33236 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47482 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33056 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56024 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35506 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59760 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46846 - "GET /health HTTP/1.1" 200 OK
 === tail deploy.log ===
-+ echo '⏳ 等待网关就绪...'
-⏳ 等待网关就绪...
-++ seq 1 60
-+ for i in $(seq 1 60)
-+ curl -sf http://localhost:8080/health
-+ sleep 5
-+ for i in $(seq 1 60)
-+ curl -sf http://localhost:8080/health
-+ break
-+ echo ''
-
-+ echo '========== 健康检查 =========='
-========== 健康检查 ==========
-+ curl -sf http://localhost/health
-ok+ echo ' ✅ 前端(Nginx)'
- ✅ 前端(Nginx)
-+ curl -sf http://localhost:8080/health
-{"status":"ok","service":"gateway"}+ echo ' ✅ 网关'
- ✅ 网关
-+ curl -sf http://localhost:7860/health
-{"status":"ok","service":"embeat"}+ echo ' ✅ Embeat'
- ✅ Embeat
-+ curl -sf http://localhost:8090/health
-{"status":"ok","service":"profile"}+ echo ' ✅ 画像'
- ✅ 画像
 + curl -sf http://localhost:6333/healthz
-healthz check passed+ echo ' ✅ Qdrant'
- ✅ Qdrant
-+ echo ================================
-================================
-+ echo ''
-
-+ echo '✅ 部署完成！端口已自动转发，访问 Codespaces 提供的 URL 即可'
-✅ 部署完成！端口已自动转发，访问 Codespaces 提供的 URL 即可
-+ echo '  前端管理:   https://<codespace>-80.app.github.dev'
-  前端管理:   https://<codespace>-80.app.github.dev
-+ echo '  API 网关:   https://<codespace>-8080.app.github.dev'
-  API 网关:   https://<codespace>-8080.app.github.dev
-+ echo '  Qdrant:     https://<codespace>-6333.app.github.dev/dashboard'
-  Qdrant:     https://<codespace>-6333.app.github.dev/dashboard
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ sleep 5
++ for i in $(seq 1 30)
++ curl -sf http://localhost:6333/healthz
++ break
++ '[' false = true ']'
++ docker compose -f deploy/clawcloud/docker-compose.yml up -d
+time="2026-08-20T09:27:59Z" level=warning msg="/workspaces/music-embeat-platform/deploy/clawcloud/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container embeat-qdrant-1  Running
+ Container embeat-embeat-1  Running
+ Container embeat-postgres-1  Running
+ Container embeat-profile-1  Running
+ Container embeat-gateway-1  Running
+ Container embeat-nginx-1  Running
+ Container embeat-qdrant-1  Waiting
+ Container embeat-postgres-1  Waiting
+ Container embeat-qdrant-1  Error
+ Container embeat-postgres-1  Healthy
+dependency failed to start: container embeat-qdrant-1 is unhealthy
