@@ -16,7 +16,7 @@
     "6333": { "label": "Qdrant 面板" }
   },
   "postCreateCommand": "cd /workspaces/music-embeat-platform && git pull --ff-only 2>&1 | tail -3; until docker info >/dev/null 2>&1; do sleep 2; done; bash deploy/codespaces/deploy-and-report.sh",
-  "postStartCommand": "cd /workspaces/music-embeat-platform && until docker info >/dev/null 2>&1; do sleep 2; done; (docker compose -p embeat ps >/dev/null 2>&1 && docker compose -p embeat up -d) || (sleep 20; bash deploy/codespaces/deploy-and-report.sh)",
+  "postStartCommand": "cd /workspaces/music-embeat-platform && until docker info >/dev/null 2>&1; do sleep 2; done; if docker compose -p embeat -f deploy/clawcloud/docker-compose.yml ps --services | grep -q .; then docker compose -p embeat -f deploy/clawcloud/docker-compose.yml up -d; else sleep 5; bash deploy/codespaces/deploy-and-report.sh; fi",
   "customizations": {
     "vscode": {
       "extensions": ["ms-azuretools.vscode-docker"]

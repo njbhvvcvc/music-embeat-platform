@@ -65,6 +65,13 @@ fi
 docker compose -f deploy/clawcloud/docker-compose.yml up -d
 
 echo ""
+echo "⏳ 等待网关就绪..."
+for i in $(seq 1 60); do
+  curl -sf http://localhost:8080/health >/dev/null 2>&1 && break
+  sleep 5
+done
+
+echo ""
 echo "========== 健康检查 =========="
 curl -sf http://localhost/health && echo " ✅ 前端(Nginx)" || echo " ❌ 前端"
 curl -sf http://localhost:8080/health && echo " ✅ 网关" || echo " ❌ 网关"
