@@ -27,6 +27,12 @@ def jsencodeuricomponent(value: str) -> str:
                 .replace("!", "%21"))
 
 
+def _fmt_artist(artist) -> str:
+    if isinstance(artist, list):
+        return " / ".join(str(x) for x in artist if x)
+    return str(artist or "")
+
+
 def _normalize_version(version: str) -> str:
     return "".join(part.zfill(2) if len(part) == 1 else part for part in version.split("."))
 
@@ -119,7 +125,7 @@ class GDStudioAPI:
                     MusicItem(
                         id=str(item.get("id", "")),
                         name=str(item.get("name", "")),
-                        artist=str(item.get("artist", "")),
+                        artist=_fmt_artist(item.get("artist")),
                         album=str(item.get("album", "")),
                         pic_id=str(item.get("pic_id", "")),
                         lyric_id=str(item.get("lyric_id", "")),
