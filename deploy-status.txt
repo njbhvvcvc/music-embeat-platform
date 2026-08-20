@@ -1,38 +1,47 @@
 DEPLOY_RC=0
-TIME=Tue Aug 18 13:58:30 UTC 2026
+TIME=Thu Aug 20 03:32:39 UTC 2026
 === docker ps ===
 NAMES               STATUS
-embeat-nginx-1      Up 1 second (health: starting)
-embeat-gateway-1    Up 1 second (health: starting)
-embeat-profile-1    Up 12 seconds (healthy)
-embeat-embeat-1     Up 12 seconds (healthy)
-embeat-postgres-1   Up 15 minutes (healthy)
-embeat-qdrant-1     Up 15 minutes (healthy)
+embeat-nginx-1      Up 5 seconds (health: starting)
+embeat-gateway-1    Up 6 seconds (health: starting)
+embeat-embeat-1     Up 56 seconds (healthy)
+embeat-profile-1    Up About a minute (healthy)
+embeat-qdrant-1     Up 2 minutes (healthy)
+embeat-postgres-1   Up 2 minutes (healthy)
 === profile logs ===
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
-INFO:     127.0.0.1:38806 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.18.0.1:57892 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42126 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37464 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42590 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45660 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.18.0.1:34036 - "GET /health HTTP/1.1" 200 OK
 === embeat logs ===
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:7860 (Press CTRL+C to quit)
-INFO:     127.0.0.1:34606 - "GET /health HTTP/1.1" 200 OK
-INFO:     172.18.0.1:37702 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45364 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.18.0.1:41654 - "GET /health HTTP/1.1" 200 OK
 === gateway logs ===
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     172.18.0.1:33232 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.18.0.1:33236 - "GET /health HTTP/1.1" 200 OK
 === tail deploy.log ===
- Container embeat-profile-1  Started
- Container embeat-embeat-1  Waiting
- Container embeat-profile-1  Waiting
- Container embeat-profile-1  Healthy
- Container embeat-embeat-1  Healthy
- Container embeat-gateway-1  Starting
- Container embeat-gateway-1  Started
- Container embeat-nginx-1  Starting
- Container embeat-nginx-1  Started
++ echo '⏳ 等待网关就绪...'
+⏳ 等待网关就绪...
+++ seq 1 60
++ for i in $(seq 1 60)
++ curl -sf http://localhost:8080/health
++ sleep 5
++ for i in $(seq 1 60)
++ curl -sf http://localhost:8080/health
++ break
 + echo ''
 
 + echo '========== 健康检查 =========='
@@ -41,8 +50,8 @@ INFO:     172.18.0.1:37702 - "GET /health HTTP/1.1" 200 OK
 ok+ echo ' ✅ 前端(Nginx)'
  ✅ 前端(Nginx)
 + curl -sf http://localhost:8080/health
-+ echo ' ❌ 网关'
- ❌ 网关
+{"status":"ok","service":"gateway"}+ echo ' ✅ 网关'
+ ✅ 网关
 + curl -sf http://localhost:7860/health
 {"status":"ok","service":"embeat"}+ echo ' ✅ Embeat'
  ✅ Embeat
