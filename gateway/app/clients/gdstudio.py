@@ -50,6 +50,7 @@ class GDStudioAPI:
             timeout=timeout,
             limits=limits,
             headers=_BROWSER_HEADERS,
+            follow_redirects=True,
         )
         self._max_retries = 3
 
