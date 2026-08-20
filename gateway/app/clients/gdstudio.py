@@ -74,7 +74,7 @@ class GDStudioAPI:
         params["s"] = await self._sign(sign_payload)
         for attempt in range(self._max_retries):
             try:
-                resp = await self.client.post("", data=params)
+                resp = await self.client.post(settings.gd_api_base, data=params)
                 resp.raise_for_status()
                 return resp.json()
             except httpx.HTTPStatusError as e:
