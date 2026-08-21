@@ -18,6 +18,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
+# CORSMiddleware 必须最后 add：Starlette 中后 add 的在最外层，才能正确响应所有请求（含 OPTIONS 预检）的 CORS 头
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,8 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(RateLimitMiddleware)
-app.add_middleware(AuthMiddleware)
 
 app.include_router(health.router, tags=["health"])
 app.include_router(search.router, prefix="/api/v1", tags=["search"])
