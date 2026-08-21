@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import search, playback, recommend, profile as profile_routes, health, auth, ops, dataset
+from app.routes import search, playback, recommend, profile as profile_routes, health, auth, ops, dataset, webdav
 from app.middleware.ratelimit import RateLimitMiddleware
 from app.middleware.auth import AuthMiddleware
 
@@ -37,3 +37,4 @@ app.include_router(profile_routes.router, prefix="/api/v1", tags=["profile"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(ops.router, prefix="/api/v1", tags=["ops"])
 app.include_router(dataset.router, prefix="/api/v1", tags=["dataset"])
+app.include_router(webdav.router, tags=["webdav"])
